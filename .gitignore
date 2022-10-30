@@ -1,1 +1,5 @@
 /target
+<<<<<<< HEAD
+=======
+/Cargo.lock
+>>>>>>> 864bd8a (Set up correct structure for a Rust crate)
