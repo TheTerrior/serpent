@@ -35,11 +35,14 @@ struct Colors {
 }
 
 // Defines actions that Serpent can do
-enum Action<'a> {
+enum Action<'a, F> 
+    where
+        F: Fn() -> () 
+{
     ToPage(i32),
     ReturnInt(i32),
     ReturnString(&'a str),
-    RunFunction(),
+    RunFunction(F),
     Quit,
 }
 
