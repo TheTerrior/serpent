@@ -12,10 +12,14 @@ fn main() {
 
 fn build_ui() {
     serpent::start();
+
     let mut ui = serpent::from(
         serpent::new_page("Main Page")
-            .text("Hello, World", Align::Center, None, "_TEXT_")
+            .controls(Controls::default()),
+            .text("Hello, World", Align::Center, None, "_TEXT_", None)
     );
+
+    ui.show();
 
 
     serpent::stop();

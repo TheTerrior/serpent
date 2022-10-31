@@ -1,15 +1,18 @@
 use ncurses as nc;
 use std::{collections::HashSet, hash::Hash};
 
+
 /// Represents a single page, which can contain a selector and a guide
 pub struct Page<'a> {
     tag: &'a str,
-    selector: Option<Selector<'a>>,
-    guide: Option<Guide<'a>>,
+    selector: Option<Selector<'a>>, // allows the user to select an option on-screen
+    guide: Option<Guide<'a>>,       // allows the user to type a certain character for an action
     texts: Vec<Text<'a>>,
     vertical_padding: i32,
     horizontal_padding: i32,
     default_colors: Colors,
+
+    parent: Option<&'a Page<'a>>,
 }
 impl<'a> Page<'a> {
 
@@ -27,7 +30,8 @@ impl<'a> Page<'a> {
                 background_default: nc::COLOR_BLACK,
                 foreground_selected: nc::COLOR_BLACK,
                 background_selected: nc::COLOR_WHITE,
-            }
+            },
+            parent: None,
         }
     }
 
@@ -43,6 +47,7 @@ impl<'a> Page<'a> {
     }
 }
 
+
 // Lets the user select a number of options
 pub struct Selector<'a> {
     tag: &'a str,
@@ -55,6 +60,7 @@ pub struct Selector<'a> {
     selected_item: u32,     // the currently selected item
 }
 
+
 // Shows the user keystrokes and their resultant action
 pub struct Guide<'a> {
     tag: &'a str,
@@ -65,6 +71,7 @@ pub struct Guide<'a> {
     item_colors: Vec<Option<Colors>>,   // if set to None, use the default for this selector
     item_actions: Vec<Action<'a>>,
 }
+
 
 // Shows a block of text
 #[derive(Clone)]
@@ -93,7 +100,13 @@ impl<'a> Text<'a> {
             height,
         }
     }
+
+    /// Retrieves the printed result
+    pub fn print(&self) -> String {
+        String::from(self.text)
+    }
 }
+
 
 // Defines the colors of text, specifically in a selector or guide
 #[derive(Clone)]
@@ -104,15 +117,19 @@ pub struct Colors {
     background_selected: i16,
 }
 
+
 // Defines actions that Serpent can do
 pub enum Action<'a>
 {
-    ToPage(Page<'a>),
+    MoveDown,   // for use with selectors
+    MoveUp,     // for use with selectors
+    Quit,       // quit out of Serpent
     ReturnInt(i32),
-    ReturnString(&'a str),
+    ReturnString(String),
     RunFunction(fn() -> ()),
-    Quit,
+    ToPage(Page<'a>),
 }
+
 
 // Alignment for various elements
 #[derive(Clone)]
@@ -128,8 +145,10 @@ pub enum Align {
     BottomRight,
 }
 
+
 // The return type of Serpent
 pub enum SerpentResult {
+    Exit,
     ReturnInt(i32),
     ReturnStr(String),
     None,

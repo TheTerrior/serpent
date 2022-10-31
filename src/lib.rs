@@ -1,13 +1,14 @@
 pub mod internal;
 use internal::*;
 use ncurses as nc;
+use termsize;
 
 
 
 
-///
+//
 /// SERPENT INTERFACE
-/// 
+//
 
 /// Start ncurses
 pub fn start() {
@@ -33,9 +34,9 @@ pub fn restart() {
 
 
 
-///
+//
 /// UI INTERFACE
-/// 
+//
 
 /// Create a new instance of UI
 pub fn new<'a>() -> UI<'a> {
@@ -60,9 +61,9 @@ pub fn new_page<'a>(name: &'a str) -> Page<'a> {
 
 
 
-///
+//
 /// UI IMPLEMENTATION
-/// 
+//
 
 /// Main controller for Serpent, utilizes ncurses
 pub struct UI<'a> {
@@ -92,8 +93,27 @@ impl<'a> UI<'a> {
 
     /// Run the UI and retrieve the result
     pub fn show(&self) -> SerpentResult {
-        nc::getch();
-        SerpentResult::None
+        loop {
+            self.render();
+            let res = self.get_input();
+
+            // if our result is None, then we can safely iterate again
+            if let SerpentResult::None = res {
+                continue;
+            };
+            return res;
+        }
+    }
+
+    /// Renders the current frame
+    fn render(&self) {
+        let width = termsize::get().unwrap().cols;
+        let height = termsize::get().unwrap().rows;
+    }
+
+    /// Gets user input and takes the correct action
+    fn get_input(&self) -> SerpentResult {
+        SerpentResult::Exit
     }
 
 }
