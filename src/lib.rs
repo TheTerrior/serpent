@@ -51,17 +51,6 @@ pub fn from<'a>(page: Page<'a>) -> UI<'a> {
 
 
 //
-/// PAGE INTERFACE
-//
-
-/// Create a new instance of Page
-pub fn new_page<'a>(name: &'a str) -> Page<'a> {
-    Page::new(name)
-}
-
-
-
-//
 /// UI IMPLEMENTATION
 //
 

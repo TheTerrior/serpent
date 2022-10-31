@@ -5,12 +5,14 @@ use std::{collections::HashSet, hash::Hash};
 /// Represents a single page, which can contain a selector and a guide
 pub struct Page<'a> {
     tag: &'a str,
+    default_colors: Colors,
+
+    keybinds: Vec<(i32, Action<'a>, &'a str)>,
     selector: Option<Selector<'a>>, // allows the user to select an option on-screen
     guide: Option<Guide<'a>>,       // allows the user to type a certain character for an action
     texts: Vec<Text<'a>>,
     vertical_padding: i32,
     horizontal_padding: i32,
-    default_colors: Colors,
 
     parent: Option<&'a Page<'a>>,
 }
@@ -20,23 +22,24 @@ impl<'a> Page<'a> {
     pub fn new(tag: &'a str) -> Page {
         Page {
             tag: tag,
-            selector: None,
-            guide: None,
-            texts: Vec::new(),
-            vertical_padding: 0,
-            horizontal_padding: 0,
             default_colors: Colors{
                 foreground_default: nc::COLOR_WHITE,
                 background_default: nc::COLOR_BLACK,
                 foreground_selected: nc::COLOR_BLACK,
                 background_selected: nc::COLOR_WHITE,
             },
+            keybinds: Vec::new(),
+            selector: None,
+            guide: None,
+            texts: Vec::new(),
+            vertical_padding: 0,
+            horizontal_padding: 0,
             parent: None,
         }
     }
 
     /// Create a new text element for this page<br>
-    /// Please make sure to provide a unique tag (identifier)
+    /// Make sure to provide a unique tag (identifier)
     pub fn text(mut self, text: &'a str, alignment: Align, colors: Option<Colors>, tag: &'a str) -> Self {
         let ncolors = match colors {
             None => self.default_colors.clone(),
@@ -45,10 +48,21 @@ impl<'a> Page<'a> {
         self.texts.push(Text::new(text, alignment, ncolors, tag));
         self
     }
+
+    /// Set the keybinds for this page<br>
+    pub fn keybinds(mut self, controls: Vec<(i32, Action<'a>, &'a str)>) -> Self {
+        self.keybinds = controls;
+        self
+    }
+
+    /// Set the child pages for this page
+    pub fn children(mut self, children: Vec<Page>) -> Self {
+        self
+    }
 }
 
 
-// Lets the user select a number of options
+/// Lets the user select a number of options
 pub struct Selector<'a> {
     tag: &'a str,
     alignment: Align,
@@ -62,20 +76,16 @@ pub struct Selector<'a> {
 }
 
 
-// Shows the user keystrokes and their resultant action
+/// Shows the user keystrokes and their resultant action
 pub struct Guide<'a> {
     tag: &'a str,
     alignment: Align,
     default_colors: Colors,
     visible: bool,
-
-    item_names: Vec<&'a str>,
-    item_colors: Vec<Option<Colors>>,   // if set to None, use the default for this selector
-    item_actions: Vec<Action<'a>>,
 }
 
 
-// Shows a block of text
+/// Shows a block of text
 #[derive(Clone)]
 pub struct Text<'a> {
     tag: &'a str,
@@ -112,7 +122,7 @@ impl<'a> Text<'a> {
 }
 
 
-// Defines the colors of text, specifically in a selector or guide
+/// Defines the colors of text, specifically in a selector or guide
 #[derive(Clone)]
 pub struct Colors {
     foreground_default: i16,
@@ -122,20 +132,22 @@ pub struct Colors {
 }
 
 
-// Defines actions that Serpent can do
+/// Defines actions that Serpent can do
 pub enum Action<'a>
 {
     MoveDown,   // for use with selectors
     MoveUp,     // for use with selectors
+    PrevPage,
     Quit,       // quit out of Serpent
     ReturnInt(i32),
     ReturnString(String),
     RunFunction(fn() -> ()),
+    Select,     // for use with selectors
     ToPage(Page<'a>),
 }
 
 
-// Alignment for various elements
+/// Alignment for various elements
 #[derive(Clone)]
 pub enum Align {
     TopLeft,
@@ -150,12 +162,47 @@ pub enum Align {
 }
 
 
-// The return type of Serpent
+/// The return type of Serpent
 pub enum SerpentResult {
     Exit,
     ReturnInt(i32),
     ReturnStr(String),
     None,
+}
+
+/// A small container for default keybinds
+pub struct Keybinds {
+
+}
+impl Keybinds {
+
+    /// The basic controls for the main page
+    pub fn main<'a>() -> Vec<(i32, Action<'a>, &'a str)> {
+        vec![
+            ('h' as i32,    Action::Quit,       "Exit program"),
+            ('j' as i32,    Action::MoveDown,   "Move down"),
+            ('k' as i32,    Action::MoveUp,     "Move up"),
+            ('l' as i32,    Action::Select,     "Select item"),
+            (27, /*esc*/    Action::Quit,       "Exit program"),
+            (66, /*down*/   Action::MoveDown,   "Move down"),
+            (65, /*up*/     Action::MoveUp,     "Move up"),
+            (10, /*enter*/  Action::Select,     "Select item"),
+        ]
+    }
+
+    /// The basic controls for any child page
+    pub fn default<'a>() -> Vec<(i32, Action<'a>, &'a str)> {
+        vec![
+            ('h' as i32,    Action::PrevPage,   "Previous page"),
+            ('j' as i32,    Action::MoveDown,   "Move down"),
+            ('k' as i32,    Action::MoveUp,     "Move up"),
+            ('l' as i32,    Action::Select,     "Select item"),
+            (27, /*esc*/    Action::PrevPage,   "Previous page"),
+            (66, /*down*/   Action::MoveDown,   "Move down"),
+            (65, /*up*/     Action::MoveUp,     "Move up"),
+            (10, /*enter*/  Action::Select,     "Select item"),
+        ]
+    }
 }
 
 

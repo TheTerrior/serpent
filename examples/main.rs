@@ -1,7 +1,6 @@
-extern crate serpent;
 use std::io::{self, stdin};
 
-use serpent::internal::*;
+use serpent::{self, internal::*};
 
 fn main() {
     //let x = serpent::add(1, 2);
@@ -14,9 +13,14 @@ fn build_ui() {
     serpent::start();
 
     let mut ui = serpent::from(
-        serpent::new_page("Main Page")
-            .controls(Controls::default()),
-            .text("Hello, World", Align::Center, None, "_TEXT_", None)
+        Page::new("Main")
+            .keybinds(Keybinds::main())
+            .children(vec![
+
+                Page::new("Inner")
+                    .keybinds(Keybinds::default()),
+
+            ])
     );
 
     ui.show();
