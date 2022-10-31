@@ -53,6 +53,7 @@ pub struct Selector<'a> {
     tag: &'a str,
     alignment: Align,
     default_colors: Colors,
+    visible: bool,
 
     item_names: Vec<&'a str>,
     item_colors: Vec<Option<Colors>>,   // if set to None, use the default for this selector
@@ -66,6 +67,7 @@ pub struct Guide<'a> {
     tag: &'a str,
     alignment: Align,
     default_colors: Colors,
+    visible: bool,
 
     item_names: Vec<&'a str>,
     item_colors: Vec<Option<Colors>>,   // if set to None, use the default for this selector
@@ -79,6 +81,7 @@ pub struct Text<'a> {
     tag: &'a str,
     alignment: Align,
     default_colors: Colors,
+    visible: bool,
 
     text: &'a str,
     width: u32,
@@ -95,6 +98,7 @@ impl<'a> Text<'a> {
             tag,
             alignment,
             default_colors,
+            visible: true,
             text,
             width,
             height,
