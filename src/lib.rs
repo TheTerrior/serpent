@@ -4,6 +4,7 @@ use ncurses as nc;
 
 
 
+
 ///
 /// SERPENT INTERFACE
 /// 
@@ -37,23 +38,23 @@ pub fn restart() {
 /// 
 
 /// Create a new instance of UI
-pub fn new<'a>() -> UI {
+pub fn new<'a>() -> UI<'a> {
     UI::new()
 }
 
 /// Create a new instance of UI from a Page
-pub fn from<'a>(page: Page) -> UI {
+pub fn from<'a>(page: Page<'a>) -> UI<'a> {
     UI::from_page(page)
 }
 
 
 
-///
+//
 /// PAGE INTERFACE
-///
+//
 
 /// Create a new instance of Page
-pub fn new_page<'a>(name: String) -> Page {
+pub fn new_page<'a>(name: &'a str) -> Page<'a> {
     Page::new(name)
 }
 
@@ -64,27 +65,27 @@ pub fn new_page<'a>(name: String) -> Page {
 /// 
 
 /// Main controller for Serpent, utilizes ncurses
-pub struct UI {
-    root_page: Option<Page>,
+pub struct UI<'a> {
+    root_page: Option<Page<'a>>,
 }
-impl UI {
+impl<'a> UI<'a> {
 
     /// Create a new instance of UI
-    pub fn new() -> UI {
+    pub fn new() -> UI<'a> {
         UI {
             root_page: None,
         }
     }
 
     /// Create a new instance of UI from a Page
-    pub fn from_page(page: Page) -> UI {
+    pub fn from_page(page: Page<'a>) -> UI<'a> {
         UI {
             root_page: Some(page),
         }
     }
 
     /// Set the root page for this UI
-    pub fn set_page(mut self, page: Page) -> Self {
+    pub fn set_page(mut self, page: Page<'a>) -> Self {
         self.root_page = Some(page);
         self
     }

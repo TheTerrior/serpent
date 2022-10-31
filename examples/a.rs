@@ -14,7 +14,7 @@ fn build_ui() {
     serpent::start();
     let mut ui = serpent::from(
         serpent::new_page("Main Page")
-            .text("Hello, World", Align::Center, None)
+            .text("Hello, World", Align::Center, None, "_TEXT_")
     );
 
 
