@@ -62,6 +62,24 @@ impl<'a> Page<'a> {
 }
 
 
+/// Splits the page in half
+struct Split<'a> {
+    visible: bool,
+    direction: bool, //true is horizontal, false is vertical
+    ratio: f32,         //what percent of the screen space this split will take up (0.1 means this only takes up 10% of the space)
+    element: Element<'a>,
+    next: Option<Box<Split<'a>>>,
+}
+
+
+/// Allows different elements to be stored as one type
+enum Element<'a> {
+    selector(Selector<'a>),
+    guide(Guide<'a>),
+    text(Text<'a>),
+}
+
+
 /// Lets the user select a number of options
 pub struct Selector<'a> {
     tag: &'a str,
@@ -100,7 +118,7 @@ pub struct Text<'a> {
 impl<'a> Text<'a> {
 
     /// Initialize a new instance of Text
-    pub fn new(text: &'a str, alignment: Align, default_colors: Colors, tag: &'a str) -> Text {
+    pub fn new(text: &'a str, alignment: Align, default_colors: Colors, tag: &'a str) -> Text<'a> {
         // first calculate the height and width of the given string
         let (width, height) = calculate_size(text);
 
