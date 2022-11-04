@@ -64,12 +64,18 @@ impl<'a> Page<'a> {
 
 
 /// Splits the page in half
-struct Split<'a> {
-    visible: bool,
-    direction: bool, //true is horizontal, false is vertical
-    ratio: f32,         //what percent of the screen space this split will take up (0.1 means this only takes up 10% of the space)
-    element: Element<'a>,
-    next: Option<Box<Split<'a>>>,
+//struct Split<'a> {
+//    visible: bool,
+//    direction: bool, //true is horizontal, false is vertical
+//    ratio: f32,         //what percent of the screen space this split will take up (0.1 means this only takes up 10% of the space)
+//    element: Element<'a>,
+//    next: Option<Box<Split<'a>>>,
+//}
+
+pub enum Split {
+    Horizontal(f32),    //horizontal split
+    Vertical(f32),      //vertical split
+    None,               //no split
 }
 
 

@@ -26,12 +26,30 @@ fn build_ui() {
     );
     */
 
+    /* 
     let mut ui = serpent::from(
         Page::new("Main")
             .keybinds(Keybinds::main())
             .root(Text::new("Hello").align(Align::CenterLeft).tag("_TEXT0_").colors(Colors::default()))
             .splith(Text::new("Waddup my man").align())
-    )
+    );
+    */
+
+    let mut ui = serpent::from(
+        Page::new("Main")
+            .keybinds(Keybinds::main())
+            .elements(vec![
+                (Split::Horizontal(0.5), Text::new("Hello").align(Align::CenterLeft).tag("_TEXT0_").colors(Colors::default())),
+                (Split::None, Text::new("Waddup my man").align(Align::Left)),
+            ])
+            
+    );
+
+
+
+
+
+
 
     ui.show();
 
