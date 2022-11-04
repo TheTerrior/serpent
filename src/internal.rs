@@ -1,4 +1,5 @@
 use ncurses as nc;
+use crate::color;
 use std::{collections::HashSet, hash::Hash};
 
 
@@ -140,6 +141,7 @@ impl<'a> Text<'a> {
 }
 
 
+
 /// Defines the colors of text, specifically in a selector or guide
 #[derive(Clone)]
 pub struct Colors {
@@ -147,6 +149,16 @@ pub struct Colors {
     background_default: i16,
     foreground_selected: i16,
     background_selected: i16,
+}
+impl Colors {
+    pub fn default() -> Colors {
+        Colors {
+            foreground_default: color::WHITE,
+            background_default: color::BLACK,
+            foreground_selected: color::BLACK,
+            background_selected: color::WHITE,
+        }
+    }
 }
 
 
@@ -172,7 +184,9 @@ pub enum Align {
     Top,
     TopRight,
     Left,
+    CenterLeft,
     Center,
+    CenterRight,
     Right,
     BottomLeft,
     Bottom,

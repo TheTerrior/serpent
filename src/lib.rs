@@ -1,4 +1,5 @@
 pub mod internal;
+pub mod color;
 use internal::*;
 use ncurses as nc;
 use termsize;
