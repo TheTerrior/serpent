@@ -1,6 +1,7 @@
 pub mod internal;
 pub mod color;
 pub mod error;
+
 use internal::*;
 use ncurses as nc;
 use termsize;

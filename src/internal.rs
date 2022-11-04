@@ -1,62 +1,39 @@
 use ncurses as nc;
+
 use crate::color;
-use std::{collections::HashSet, hash::Hash};
+use crate::error;
 
 
 /// Represents a single page, which can contain a selector and a guide
 pub struct Page<'a> {
     tag: &'a str,
-    default_colors: Colors,
-
+    colors: Colors,
     keybinds: Vec<(i32, Action<'a>, &'a str)>,
-    selector: Option<Selector<'a>>, // allows the user to select an option on-screen
-    guide: Option<Guide<'a>>,       // allows the user to type a certain character for an action
-    texts: Vec<Text<'a>>,
-    vertical_padding: i32,
-    horizontal_padding: i32,
-
     parent: Option<&'a Page<'a>>,
 }
 impl<'a> Page<'a> {
 
     /// Initialize a new instance of Page
-    pub fn new(tag: &'a str) -> Page {
+    pub fn new(name: &'a str) -> Page {
         Page {
-            tag: tag,
-            default_colors: Colors{
-                foreground_default: nc::COLOR_WHITE,
-                background_default: nc::COLOR_BLACK,
-                foreground_selected: nc::COLOR_BLACK,
-                background_selected: nc::COLOR_WHITE,
-            },
+            tag: name,
+            colors: Colors::default(),
             keybinds: Vec::new(),
-            selector: None,
-            guide: None,
-            texts: Vec::new(),
-            vertical_padding: 0,
-            horizontal_padding: 0,
             parent: None,
         }
     }
 
-    /// Create a new text element for this page<br>
-    /// Make sure to provide a unique tag (identifier)
-    pub fn text(mut self, text: &'a str, alignment: Align, colors: Option<Colors>, tag: &'a str) -> Self {
-        let ncolors = match colors {
-            None => self.default_colors.clone(),
-            Some(nc) => nc,
-        };
-        self.texts.push(Text::new(text, alignment, ncolors, tag));
+    /// Set the keybinds for this page TODO
+    pub fn keybinds(mut self, binds: Vec<Keybind>) -> Self {
         self
     }
 
-    /// Set the keybinds for this page<br>
-    pub fn keybinds(mut self, controls: Vec<(i32, Action<'a>, &'a str)>) -> Self {
-        self.keybinds = controls;
+    /// TODO
+    pub fn elements(mut self, elements: Vec<(Split, Element)>) -> Self {
         self
     }
 
-    /// Set the child pages for this page
+    /// Set the child pages for this page TODO
     pub fn children(mut self, children: Vec<Page>) -> Self {
         self
     }
@@ -72,6 +49,7 @@ impl<'a> Page<'a> {
 //    next: Option<Box<Split<'a>>>,
 //}
 
+/// Defines different types of splits
 pub enum Split {
     Horizontal(f32),    //horizontal split
     Vertical(f32),      //vertical split
@@ -80,18 +58,31 @@ pub enum Split {
 
 
 /// Allows different elements to be stored as one type
-enum Element<'a> {
+pub enum Element<'a> {
     selector(Selector<'a>),
     guide(Guide<'a>),
     text(Text<'a>),
 }
+impl<'a> Element<'a> {
+    pub fn new_selector() -> Element<'a> {
+        Element::selector(Selector::new())
+    }
+
+    pub fn new_guide() -> Element<'a> {
+        Element::guide(Guide::new())
+    }
+
+    pub fn new_text(text: &'a str) -> Element<'a> {
+        Element::text(Text::new(text))
+    }
+}
 
 
-/// Lets the user select a number of options
+/// Lets the user select from a number of options
 pub struct Selector<'a> {
-    tag: &'a str,
+    tag: Option<&'a str>,
     alignment: Align,
-    default_colors: Colors,
+    colors: Colors,
     visible: bool,
 
     item_names: Vec<&'a str>,
@@ -99,23 +90,97 @@ pub struct Selector<'a> {
     item_actions: Vec<Action<'a>>,
     selected_item: u32,     // the currently selected item
 }
+impl<'a> Selector<'a> {
+    pub fn new() -> Selector<'a> {
+        Selector {
+            tag: None,
+            alignment: Align::Center,
+            colors: Colors::inherit(),
+            visible: true,
+            item_names: Vec::new(),
+            item_colors: Vec::new(),
+            item_actions: Vec::new(),
+            selected_item: 0,
+        }
+    }
+
+    pub fn align(mut self, alignment: Align) -> Self {
+        self.alignment = alignment;
+        self
+    }
+
+    pub fn colors(mut self, colors: Colors) -> Self {
+        self.colors = colors;
+        self
+    }
+    
+    pub fn tag(mut self, tag: &'a str) -> Self {
+        self.tag = Some(tag);
+        self
+    }
+
+    pub fn visible(mut self, visible: bool) -> Self {
+        self.visible = visible;
+        self
+    }
+
+    /// Retrieves the printed result TODO
+    pub fn print(&self) -> String {
+        String::new()
+    }
+}
 
 
-/// Shows the user keystrokes and their resultant action
+/// Shows the user keystrokes for this page and their resultant actions
 pub struct Guide<'a> {
-    tag: &'a str,
+    tag: Option<&'a str>,
     alignment: Align,
-    default_colors: Colors,
+    colors: Colors,
     visible: bool,
+}
+impl<'a> Guide<'a> {
+    pub fn new() -> Guide<'a> {
+        Guide {
+            tag: None,
+            alignment: Align::Center,
+            colors: Colors::inherit(),
+            visible: true,
+        }
+    }
+
+    pub fn align(mut self, alignment: Align) -> Self {
+        self.alignment = alignment;
+        self
+    }
+
+    pub fn colors(mut self, colors: Colors) -> Self {
+        self.colors = colors;
+        self
+    }
+    
+    pub fn tag(mut self, tag: &'a str) -> Self {
+        self.tag = Some(tag);
+        self
+    }
+
+    pub fn visible(mut self, visible: bool) -> Self {
+        self.visible = visible;
+        self
+    }
+     
+    /// Retrieves the printed result TODO
+    pub fn print(&self) -> String {
+        String::new()
+    }
 }
 
 
 /// Shows a block of text
 #[derive(Clone)]
 pub struct Text<'a> {
-    tag: &'a str,
+    tag: Option<&'a str>,
     alignment: Align,
-    default_colors: Colors,
+    colors: Colors,
     visible: bool,
 
     text: &'a str,
@@ -125,14 +190,14 @@ pub struct Text<'a> {
 impl<'a> Text<'a> {
 
     /// Initialize a new instance of Text
-    pub fn new(text: &'a str, alignment: Align, default_colors: Colors, tag: &'a str) -> Text<'a> {
+    pub fn new(text: &'a str) -> Text<'a> {
+        
         // first calculate the height and width of the given string
         let (width, height) = calculate_size(text);
-
         Text {
-            tag,
-            alignment,
-            default_colors,
+            tag: None,
+            alignment: Align::Center,
+            colors: Colors::inherit(),
             visible: true,
             text,
             width,
@@ -140,7 +205,27 @@ impl<'a> Text<'a> {
         }
     }
 
-    /// Retrieves the printed result
+    pub fn align(mut self, alignment: Align) -> Self {
+        self.alignment = alignment;
+        self
+    }
+
+    pub fn colors(mut self, colors: Colors) -> Self {
+        self.colors = colors;
+        self
+    }
+    
+    pub fn tag(mut self, tag: &'a str) -> Self {
+        self.tag = Some(tag);
+        self
+    }
+
+    pub fn visible(mut self, visible: bool) -> Self {
+        self.visible = visible;
+        self
+    }
+
+    /// Retrieves the printed result TODO
     pub fn print(&self) -> String {
         String::from(self.text)
     }
@@ -163,6 +248,16 @@ impl Colors {
             background_default: color::BLACK,
             foreground_selected: color::BLACK,
             background_selected: color::WHITE,
+        }
+    }
+
+    /// Inherit the colors from the page
+    pub fn inherit() -> Colors {
+        Colors {
+            foreground_default: color::INHERIT,
+            background_default: color::INHERIT,
+            foreground_selected: color::INHERIT,
+            background_selected: color::INHERIT,
         }
     }
 }
@@ -209,36 +304,45 @@ pub enum SerpentResult {
 }
 
 /// A small container for default keybinds
+pub struct Keybind<'a> {
+    key: i32,
+    action: Action<'a>,
+    description: &'a str,
+}
+impl<'a> Keybind<'a> {
+
+}
+
 pub struct Keybinds {
 
 }
 impl Keybinds {
 
     /// The basic controls for the main page
-    pub fn main<'a>() -> Vec<(i32, Action<'a>, &'a str)> {
+    pub fn main<'a>() -> Vec<Keybind<'a>> {
         vec![
-            ('h' as i32,    Action::Quit,       "Exit program"),
-            ('j' as i32,    Action::MoveDown,   "Move down"),
-            ('k' as i32,    Action::MoveUp,     "Move up"),
-            ('l' as i32,    Action::Select,     "Select item"),
-            (27, /*esc*/    Action::Quit,       "Exit program"),
-            (66, /*down*/   Action::MoveDown,   "Move down"),
-            (65, /*up*/     Action::MoveUp,     "Move up"),
-            (10, /*enter*/  Action::Select,     "Select item"),
+            Keybind{key: 'h' as i32,   action: Action::Quit,       description: "Exit program"},
+            Keybind{key: 'j' as i32,   action: Action::MoveDown,   description: "Move down"},
+            Keybind{key: 'k' as i32,   action: Action::MoveUp,     description: "Move up"},
+            Keybind{key: 'l' as i32,   action: Action::Select,     description: "Select item"},
+            Keybind{key: 27, /*esc*/   action: Action::Quit,       description: "Exit program"},
+            Keybind{key: 66, /*down*/  action: Action::MoveDown,   description: "Move down"},
+            Keybind{key: 65, /*up*/    action: Action::MoveUp,     description: "Move up"},
+            Keybind{key: 10, /*enter*/ action: Action::Select,     description: "Select item"},
         ]
     }
 
     /// The basic controls for any child page
-    pub fn default<'a>() -> Vec<(i32, Action<'a>, &'a str)> {
+    pub fn default<'a>() -> Vec<Keybind<'a>> {
         vec![
-            ('h' as i32,    Action::PrevPage,   "Previous page"),
-            ('j' as i32,    Action::MoveDown,   "Move down"),
-            ('k' as i32,    Action::MoveUp,     "Move up"),
-            ('l' as i32,    Action::Select,     "Select item"),
-            (27, /*esc*/    Action::PrevPage,   "Previous page"),
-            (66, /*down*/   Action::MoveDown,   "Move down"),
-            (65, /*up*/     Action::MoveUp,     "Move up"),
-            (10, /*enter*/  Action::Select,     "Select item"),
+            Keybind{key: 'h' as i32,   action: Action::PrevPage,   description: "Previous page"},
+            Keybind{key: 'j' as i32,   action: Action::MoveDown,   description: "Move down"},
+            Keybind{key: 'k' as i32,   action: Action::MoveUp,     description: "Move up"},
+            Keybind{key: 'l' as i32,   action: Action::Select,     description: "Select item"},
+            Keybind{key: 27, /*esc*/   action: Action::PrevPage,   description: "Previous page"},
+            Keybind{key: 66, /*down*/  action: Action::MoveDown,   description: "Move down"},
+            Keybind{key: 65, /*up*/    action: Action::MoveUp,     description: "Move up"},
+            Keybind{key: 10, /*enter*/ action: Action::Select,     description: "Select item"},
         ]
     }
 }

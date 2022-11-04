@@ -1,3 +1,4 @@
+pub const INHERIT: i16 = -1;
 pub const BLACK: i16 = 0;
 pub const RED: i16 = 1;
 pub const GREEN: i16 = 2;

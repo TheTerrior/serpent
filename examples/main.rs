@@ -39,10 +39,10 @@ fn build_ui() {
         Page::new("Main")
             .keybinds(Keybinds::main())
             .elements(vec![
-                (Split::Horizontal(0.5), Text::new("Hello").align(Align::CenterLeft).tag("_TEXT0_").colors(Colors::default())),
-                (Split::None, Text::new("Waddup my man").align(Align::Left)),
+                (Split::Horizontal(0.5), Element::new_text("Hello").align(Align::CenterLeft).tag("_TEXT0_").colors(Colors::default())),
+                (Split::None, Element::new_text("Waddup my man").align(Align::Left)),
             ])
-            
+
     );
 
 
