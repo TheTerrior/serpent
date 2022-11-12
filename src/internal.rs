@@ -8,7 +8,7 @@ use crate::error;
 pub struct Page<'a> {
     tag: &'a str,
     colors: Colors,
-    keybinds: Vec<(i32, Action<'a>, &'a str)>,
+    keybinds: Vec<Keybind<'a>>,
     parent: Option<&'a Page<'a>>,
 }
 impl<'a> Page<'a> {
@@ -23,13 +23,15 @@ impl<'a> Page<'a> {
         }
     }
 
-    /// Set the keybinds for this page TODO
-    pub fn keybinds(mut self, binds: Vec<Keybind>) -> Self {
+    /// Set the keybinds for this page
+    pub fn keybinds(mut self, binds: Vec<Keybind<'a>>) -> Self {
+        self.keybinds = binds;
         self
     }
 
-    /// TODO
+    /// Create a tree of elements
     pub fn elements(mut self, elements: Vec<(Split, Element)>) -> Self {
+
         self
     }
 
@@ -75,6 +77,7 @@ impl<'a> Element<'a> {
     pub fn new_text(text: &'a str) -> Element<'a> {
         Element::text(Text::new(text))
     }
+
 }
 
 
