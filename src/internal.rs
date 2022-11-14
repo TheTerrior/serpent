@@ -1,3 +1,4 @@
+use std::mem;
 use ncurses as nc;
 
 use crate::color;
@@ -5,6 +6,7 @@ use crate::error;
 
 
 /// Represents a single page, which can contain a selector and a guide
+#[derive(Clone)]
 pub struct Page<'a> {
     tag: &'a str,
     colors: Colors,
@@ -52,6 +54,7 @@ impl<'a> Page<'a> {
 //}
 
 /// Defines different types of splits
+#[derive(Clone)]
 pub enum Split {
     Horizontal(f32),    //horizontal split
     Vertical(f32),      //vertical split
@@ -60,6 +63,7 @@ pub enum Split {
 
 
 /// Allows different elements to be stored as one type
+#[derive(Clone)]
 pub enum Element<'a> {
     selector(Selector<'a>),
     guide(Guide<'a>),
@@ -78,10 +82,53 @@ impl<'a> Element<'a> {
         Element::text(Text::new(text))
     }
 
+    pub fn align(self, alignment: Align) -> Self {
+        match self {
+            Self::selector(s) => {
+                Element::selector(s.align(alignment))
+            },
+            Self::guide(g) => {
+                Element::guide(g.align(alignment))
+            },
+            Self::text(t) => {
+                Element::text(t.align(alignment))
+            },
+        }
+    }
+
+    pub fn tag(self, tag: &'a str) -> Self {
+        match self {
+            Self::selector(s) => {
+                Element::selector(s.tag(tag))
+            },
+            Self::guide(g) => {
+                Element::guide(g.tag(tag))
+            },
+            Self::text(t) => {
+                Element::text(t.tag(tag))
+            },
+        }
+    }
+
+    pub fn colors(self, colors: Colors) -> Self {
+        match self {
+            Self::selector(s) => {
+                Element::selector(s.colors(colors))
+            },
+            Self::guide(g) => {
+                Element::guide(g.colors(colors))
+            },
+            Self::text(t) => {
+                Element::text(t.colors(colors))
+            },
+        }
+    }
+
 }
 
 
 /// Lets the user select from a number of options
+#[derive(Clone)]
 pub struct Selector<'a> {
     tag: Option<&'a str>,
     alignment: Align,
@@ -135,6 +182,7 @@ impl<'a> Selector<'a> {
 
 
 /// Shows the user keystrokes for this page and their resultant actions
+#[derive(Clone)]
 pub struct Guide<'a> {
     tag: Option<&'a str>,
     alignment: Align,
@@ -267,6 +315,7 @@ impl Colors {
 
 
 /// Defines actions that Serpent can do
+#[derive(Clone)]
 pub enum Action<'a>
 {
     MoveDown,   // for use with selectors
@@ -299,6 +348,7 @@ pub enum Align {
 
 
 /// The return type of Serpent
+#[derive(Clone)]
 pub enum SerpentResult {
     Exit,
     ReturnInt(i32),
@@ -307,6 +357,7 @@ pub enum SerpentResult {
 }
 
 /// A small container for default keybinds
+#[derive(Clone)]
 pub struct Keybind<'a> {
     key: i32,
     action: Action<'a>,
@@ -316,6 +367,7 @@ impl<'a> Keybind<'a> {
 
 }
 
+#[derive(Clone)]
 pub struct Keybinds {
 
 }
