@@ -1,6 +1,6 @@
 use std::io::{self, stdin};
 
-use serpent::{self, internal::*, color};
+use serpent::{self, internal::*};
 
 fn main() {
     //let x = serpent::add(1, 2);
@@ -35,23 +35,23 @@ fn build_ui() {
     );
     */
 
-    let mut ui = serpent::from(
-        Page::new("Main")
-            .keybinds(Keybinds::main())
-            .elements(vec![
-                (Split::Horizontal(0.5), Element::new_text("Hello").align(Align::CenterLeft).tag("_TEXT0_").colors(Colors::default())),
-                (Split::None, Element::new_text("Waddup my man").align(Align::Left)),
-            ])
+    //let mut ui = serpent::from(
+    //    Page::new("Main")
+    //        .keybinds(Keybinds::main())
+    //        .elements(vec![
+    //            (Split::Horizontal(0.5), Element::new_text("Hello").align(Align::CenterLeft).tag("_TEXT0_").colors(Colors::default())),
+    //            (Split::None, Element::new_text("Waddup my man").align(Align::Left)),
+    //        ])
 
-    );
-
-
+    //);
 
 
 
 
 
-    ui.show();
+
+
+    //ui.show();
 
 
     serpent::stop();

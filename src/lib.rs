@@ -1,5 +1,4 @@
 pub mod internal;
-pub mod color;
 pub mod error;
 
 use internal::*;
@@ -42,12 +41,12 @@ pub fn restart() {
 //
 
 /// Create a new instance of UI
-pub fn new<'a>() -> UI<'a> {
+pub fn new() -> UI {
     UI::new()
 }
 
 /// Create a new instance of UI from a Page
-pub fn from<'a>(page: Page<'a>) -> UI<'a> {
+pub fn from(page: Page) -> UI {
     UI::from_page(page)
 }
 
@@ -58,27 +57,27 @@ pub fn from<'a>(page: Page<'a>) -> UI<'a> {
 //
 
 /// Main controller for Serpent, utilizes ncurses
-pub struct UI<'a> {
-    root_page: Option<Page<'a>>,
+pub struct UI {
+    root_page: Option<Page>,
 }
-impl<'a> UI<'a> {
+impl UI {
 
     /// Create a new instance of UI
-    pub fn new() -> UI<'a> {
+    pub fn new() -> UI {
         UI {
             root_page: None,
         }
     }
 
     /// Create a new instance of UI from a Page
-    pub fn from_page(page: Page<'a>) -> UI<'a> {
+    pub fn from_page(page: Page) -> UI {
         UI {
             root_page: Some(page),
         }
     }
 
     /// Set the root page for this UI
-    pub fn set_page(mut self, page: Page<'a>) -> Self {
+    pub fn set_page(mut self, page: Page) -> Self {
         self.root_page = Some(page);
         self
     }
@@ -111,32 +110,22 @@ impl<'a> UI<'a> {
 }
 
 
-
-
-
-
-
-
-
-
-// remove this later
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+/// Enum used for color declarations
+#[derive(Clone)]
+pub enum Color {
+    Inherit,
+    Black,
+    White,
+    Red,
+    Green,
+    Blue,
+    Cyan,
+    Magent,
+    Yellow,
 }
 
 
 
 
 
-/*
-#[cfg(test)]
-mod tests {
-    use super::*;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
-*/

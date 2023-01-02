@@ -1,22 +1,21 @@
 use std::mem;
 use ncurses as nc;
 
-use crate::color;
-use crate::error;
+use crate::{error, Color};
 
 
 /// Represents a single page, which can contain a selector and a guide
 #[derive(Clone)]
-pub struct Page<'a> {
-    tag: &'a str,
+pub struct Page {
+    tag: String,
     colors: Colors,
-    keybinds: Vec<Keybind<'a>>,
-    parent: Option<&'a Page<'a>>,
+    keybinds: Vec<Keybind>,
+    parent: Option<Box<Page>>,
 }
-impl<'a> Page<'a> {
+impl Page {
 
     /// Initialize a new instance of Page
-    pub fn new(name: &'a str) -> Page {
+    pub fn new(name: String) -> Page {
         Page {
             tag: name,
             colors: Colors::default(),
@@ -26,7 +25,7 @@ impl<'a> Page<'a> {
     }
 
     /// Set the keybinds for this page
-    pub fn keybinds(mut self, binds: Vec<Keybind<'a>>) -> Self {
+    pub fn keybinds(mut self, binds: Vec<Keybind>) -> Self {
         self.keybinds = binds;
         self
     }
@@ -64,21 +63,16 @@ pub enum Split {
 
 /// Allows different elements to be stored as one type
 #[derive(Clone)]
-pub enum Element<'a> {
-    selector(Selector<'a>),
-    guide(Guide<'a>),
-    text(Text<'a>),
+pub enum Element {
+    selector(Selector),
+    text(Text),
 }
-impl<'a> Element<'a> {
-    pub fn new_selector() -> Element<'a> {
+impl Element {
+    pub fn new_selector() -> Element {
         Element::selector(Selector::new())
     }
 
-    pub fn new_guide() -> Element<'a> {
-        Element::guide(Guide::new())
-    }
-
-    pub fn new_text(text: &'a str) -> Element<'a> {
+    pub fn new_text(text: String) -> Element {
         Element::text(Text::new(text))
     }
 
@@ -87,22 +81,16 @@ impl<'a> Element<'a> {
             Self::selector(s) => {
                 Element::selector(s.align(alignment))
             },
-            Self::guide(g) => {
-                Element::guide(g.align(alignment))
-            },
             Self::text(t) => {
                 Element::text(t.align(alignment))
             },
         }
     }
 
-    pub fn tag(self, tag: &'a str) -> Self {
+    pub fn tag(self, tag: String) -> Self {
         match self {
             Self::selector(s) => {
                 Element::selector(s.tag(tag))
-            },
-            Self::guide(g) => {
-                Element::guide(g.tag(tag))
             },
             Self::text(t) => {
                 Element::text(t.tag(tag))
@@ -115,9 +103,6 @@ impl<'a> Element<'a> {
             Self::selector(s) => {
                 Element::selector(s.colors(colors))
             },
-            Self::guide(g) => {
-                Element::guide(g.colors(colors))
-            },
             Self::text(t) => {
                 Element::text(t.colors(colors))
             },
@@ -129,19 +114,19 @@ impl<'a> Element<'a> {
 
 /// Lets the user select from a number of options
 #[derive(Clone)]
-pub struct Selector<'a> {
-    tag: Option<&'a str>,
+pub struct Selector {
+    tag: Option<String>,
     alignment: Align,
     colors: Colors,
     visible: bool,
 
-    item_names: Vec<&'a str>,
+    item_names: Vec<String>,
     item_colors: Vec<Option<Colors>>,   // if set to None, use the default for this selector
-    item_actions: Vec<Action<'a>>,
+    item_actions: Vec<Action>,
     selected_item: u32,     // the currently selected item
 }
-impl<'a> Selector<'a> {
-    pub fn new() -> Selector<'a> {
+impl Selector {
+    pub fn new() -> Selector {
         Selector {
             tag: None,
             alignment: Align::Center,
@@ -164,7 +149,7 @@ impl<'a> Selector<'a> {
         self
     }
     
-    pub fn tag(mut self, tag: &'a str) -> Self {
+    pub fn tag(mut self, tag: String) -> Self {
         self.tag = Some(tag);
         self
     }
@@ -174,51 +159,6 @@ impl<'a> Selector<'a> {
         self
     }
 
-    /// Retrieves the printed result TODO
-    pub fn print(&self) -> String {
-        String::new()
-    }
-}
-
-
-/// Shows the user keystrokes for this page and their resultant actions
-#[derive(Clone)]
-pub struct Guide<'a> {
-    tag: Option<&'a str>,
-    alignment: Align,
-    colors: Colors,
-    visible: bool,
-}
-impl<'a> Guide<'a> {
-    pub fn new() -> Guide<'a> {
-        Guide {
-            tag: None,
-            alignment: Align::Center,
-            colors: Colors::inherit(),
-            visible: true,
-        }
-    }
-
-    pub fn align(mut self, alignment: Align) -> Self {
-        self.alignment = alignment;
-        self
-    }
-
-    pub fn colors(mut self, colors: Colors) -> Self {
-        self.colors = colors;
-        self
-    }
-    
-    pub fn tag(mut self, tag: &'a str) -> Self {
-        self.tag = Some(tag);
-        self
-    }
-
-    pub fn visible(mut self, visible: bool) -> Self {
-        self.visible = visible;
-        self
-    }
-     
     /// Retrieves the printed result TODO
     pub fn print(&self) -> String {
         String::new()
@@ -228,23 +168,23 @@ impl<'a> Guide<'a> {
 
 /// Shows a block of text
 #[derive(Clone)]
-pub struct Text<'a> {
-    tag: Option<&'a str>,
+pub struct Text {
+    tag: Option<String>,
     alignment: Align,
     colors: Colors,
     visible: bool,
 
-    text: &'a str,
+    text: String,
     width: u32,
     height: u32,
 }
-impl<'a> Text<'a> {
+impl Text {
 
     /// Initialize a new instance of Text
-    pub fn new(text: &'a str) -> Text<'a> {
+    pub fn new(text: String) -> Text {
         
         // first calculate the height and width of the given string
-        let (width, height) = calculate_size(text);
+        let (width, height) = calculate_size(&text);
         Text {
             tag: None,
             alignment: Align::Center,
@@ -266,7 +206,7 @@ impl<'a> Text<'a> {
         self
     }
     
-    pub fn tag(mut self, tag: &'a str) -> Self {
+    pub fn tag(mut self, tag: String) -> Self {
         self.tag = Some(tag);
         self
     }
@@ -278,7 +218,7 @@ impl<'a> Text<'a> {
 
     /// Retrieves the printed result TODO
     pub fn print(&self) -> String {
-        String::from(self.text)
+        self.text.clone()
     }
 }
 
@@ -287,28 +227,28 @@ impl<'a> Text<'a> {
 /// Defines the colors of text, specifically in a selector or guide
 #[derive(Clone)]
 pub struct Colors {
-    foreground_default: i16,
-    background_default: i16,
-    foreground_selected: i16,
-    background_selected: i16,
+    foreground_default: Color,
+    background_default: Color,
+    foreground_selected: Color,
+    background_selected: Color,
 }
 impl Colors {
     pub fn default() -> Colors {
         Colors {
-            foreground_default: color::WHITE,
-            background_default: color::BLACK,
-            foreground_selected: color::BLACK,
-            background_selected: color::WHITE,
+            foreground_default: Color::White,
+            background_default: Color::Black,
+            foreground_selected: Color::Black,
+            background_selected: Color::White,
         }
     }
 
     /// Inherit the colors from the page
     pub fn inherit() -> Colors {
         Colors {
-            foreground_default: color::INHERIT,
-            background_default: color::INHERIT,
-            foreground_selected: color::INHERIT,
-            background_selected: color::INHERIT,
+            foreground_default: Color::Inherit,
+            background_default: Color::Inherit,
+            foreground_selected: Color::Inherit,
+            background_selected: Color::Inherit,
         }
     }
 }
@@ -316,7 +256,7 @@ impl Colors {
 
 /// Defines actions that Serpent can do
 #[derive(Clone)]
-pub enum Action<'a>
+pub enum Action
 {
     MoveDown,   // for use with selectors
     MoveUp,     // for use with selectors
@@ -326,7 +266,7 @@ pub enum Action<'a>
     ReturnString(String),
     RunFunction(fn() -> ()),
     Select,     // for use with selectors
-    ToPage(Page<'a>),
+    ToPage(Page),
 }
 
 
@@ -358,12 +298,12 @@ pub enum SerpentResult {
 
 /// A small container for default keybinds
 #[derive(Clone)]
-pub struct Keybind<'a> {
+pub struct Keybind {
     key: i32,
-    action: Action<'a>,
-    description: &'a str,
+    action: Action,
+    description: String,
 }
-impl<'a> Keybind<'a> {
+impl Keybind {
 
 }
 
@@ -374,30 +314,30 @@ pub struct Keybinds {
 impl Keybinds {
 
     /// The basic controls for the main page
-    pub fn main<'a>() -> Vec<Keybind<'a>> {
+    pub fn main<'a>() -> Vec<Keybind> {
         vec![
-            Keybind{key: 'h' as i32,   action: Action::Quit,       description: "Exit program"},
-            Keybind{key: 'j' as i32,   action: Action::MoveDown,   description: "Move down"},
-            Keybind{key: 'k' as i32,   action: Action::MoveUp,     description: "Move up"},
-            Keybind{key: 'l' as i32,   action: Action::Select,     description: "Select item"},
-            Keybind{key: 27, /*esc*/   action: Action::Quit,       description: "Exit program"},
-            Keybind{key: 66, /*down*/  action: Action::MoveDown,   description: "Move down"},
-            Keybind{key: 65, /*up*/    action: Action::MoveUp,     description: "Move up"},
-            Keybind{key: 10, /*enter*/ action: Action::Select,     description: "Select item"},
+            Keybind{key: 'h' as i32,   action: Action::Quit,       description: String::from("Exit program")},
+            Keybind{key: 'j' as i32,   action: Action::MoveDown,   description: String::from("Move down")},
+            Keybind{key: 'k' as i32,   action: Action::MoveUp,     description: String::from("Move up")},
+            Keybind{key: 'l' as i32,   action: Action::Select,     description: String::from("Select item")},
+            Keybind{key: 27, /*esc*/   action: Action::Quit,       description: String::from("Exit program")},
+            Keybind{key: 66, /*down*/  action: Action::MoveDown,   description: String::from("Move down")},
+            Keybind{key: 65, /*up*/    action: Action::MoveUp,     description: String::from("Move up")},
+            Keybind{key: 10, /*enter*/ action: Action::Select,     description: String::from("Select item")},
         ]
     }
 
     /// The basic controls for any child page
-    pub fn default<'a>() -> Vec<Keybind<'a>> {
+    pub fn default<'a>() -> Vec<Keybind> {
         vec![
-            Keybind{key: 'h' as i32,   action: Action::PrevPage,   description: "Previous page"},
-            Keybind{key: 'j' as i32,   action: Action::MoveDown,   description: "Move down"},
-            Keybind{key: 'k' as i32,   action: Action::MoveUp,     description: "Move up"},
-            Keybind{key: 'l' as i32,   action: Action::Select,     description: "Select item"},
-            Keybind{key: 27, /*esc*/   action: Action::PrevPage,   description: "Previous page"},
-            Keybind{key: 66, /*down*/  action: Action::MoveDown,   description: "Move down"},
-            Keybind{key: 65, /*up*/    action: Action::MoveUp,     description: "Move up"},
-            Keybind{key: 10, /*enter*/ action: Action::Select,     description: "Select item"},
+            Keybind{key: 'h' as i32,   action: Action::PrevPage,   description: String::from("Previous page")},
+            Keybind{key: 'j' as i32,   action: Action::MoveDown,   description: String::from("Move down")},
+            Keybind{key: 'k' as i32,   action: Action::MoveUp,     description: String::from("Move up")},
+            Keybind{key: 'l' as i32,   action: Action::Select,     description: String::from("Select item")},
+            Keybind{key: 27, /*esc*/   action: Action::PrevPage,   description: String::from("Previous page")},
+            Keybind{key: 66, /*down*/  action: Action::MoveDown,   description: String::from("Move down")},
+            Keybind{key: 65, /*up*/    action: Action::MoveUp,     description: String::from("Move up")},
+            Keybind{key: 10, /*enter*/ action: Action::Select,     description: String::from("Select item")},
         ]
     }
 }
