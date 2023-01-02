@@ -1,6 +1,8 @@
 pub mod internal;
 pub mod error;
 
+use std::cell::RefCell;
+
 use internal::*;
 use ncurses as nc;
 use termsize;
@@ -45,11 +47,6 @@ pub fn new() -> UI {
     UI::new()
 }
 
-/// Create a new instance of UI from a Page
-pub fn from(page: Page) -> UI {
-    UI::from_page(page)
-}
-
 
 
 //
@@ -58,29 +55,36 @@ pub fn from(page: Page) -> UI {
 
 /// Main controller for Serpent, utilizes ncurses
 pub struct UI {
-    root_page: Option<Page>,
+    pages: Vec<RefCell<Page>>,
 }
 impl UI {
 
     /// Create a new instance of UI
     pub fn new() -> UI {
         UI {
-            root_page: None,
+            pages: Vec::new(),
         }
     }
 
-    /// Create a new instance of UI from a Page
-    pub fn from_page(page: Page) -> UI {
-        UI {
-            root_page: Some(page),
-        }
+    /// Create a new page in this UI, returns a mutable reference and the page index
+    pub fn new_page(&mut self) -> (usize, RefCell<Partition>) {
+        let mut page = Page::new(); //generate a new page
+        let page_ref = RefCell::new(page); //place the page into a refcell
+
+        let mut base_partition = Partition {
+            parent: page_ref.clone(), //set the parent page of this partition
+            size: termsize::get().map(|size| (size.cols as usize, size.rows as usize)).unwrap(), //get the size of the terminal
+            offset: (0, 0), //no offset, base partition
+            element: None, //no initial element
+        };
+
+        page_ref.borrow_mut().partitions = Vec::new(); //push the base partition to the page's list of partitions
+        //self.pages.push(RefCell::new(Page::new())); //push the page to the UI's list of pages
+        self.pages.push(page_ref.clone());
+        //(self.pages.len(), &mut self.pages.last_mut().unwrap().borrow_mut().partitions[0]) //return the mut ref to the partition
+        (self.pages.len(), )
     }
 
-    /// Set the root page for this UI
-    pub fn set_page(mut self, page: Page) -> Self {
-        self.root_page = Some(page);
-        self
-    }
 
     /// Run the UI and retrieve the result
     pub fn show(&self) -> SerpentResult {

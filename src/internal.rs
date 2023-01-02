@@ -1,4 +1,4 @@
-use std::mem;
+use std::{mem, cell::RefCell, rc::Rc};
 use ncurses as nc;
 
 use crate::{error, Color};
@@ -7,109 +7,48 @@ use crate::{error, Color};
 /// Represents a single page, which can contain a selector and a guide
 #[derive(Clone)]
 pub struct Page {
-    tag: String,
-    colors: Colors,
-    keybinds: Vec<Keybind>,
-    parent: Option<Box<Page>>,
+    pub keybinds: Vec<Keybind>,
+    pub partitions: Vec<Partition>,
 }
 impl Page {
 
     /// Initialize a new instance of Page
-    pub fn new(name: String) -> Page {
+    pub fn new() -> Page {
         Page {
-            tag: name,
-            colors: Colors::default(),
-            keybinds: Vec::new(),
-            parent: None,
+            keybinds: Keybinds::default(),
+            partitions: Vec::new(),
+
         }
     }
+
+
 
     /// Set the keybinds for this page
     pub fn keybinds(mut self, binds: Vec<Keybind>) -> Self {
         self.keybinds = binds;
         self
     }
-
-    /// Create a tree of elements
-    pub fn elements(mut self, elements: Vec<(Split, Element)>) -> Self {
-
-        self
-    }
-
-    /// Set the child pages for this page TODO
-    pub fn children(mut self, children: Vec<Page>) -> Self {
-        self
-    }
 }
 
 
-/// Splits the page in half
-//struct Split<'a> {
-//    visible: bool,
-//    direction: bool, //true is horizontal, false is vertical
-//    ratio: f32,         //what percent of the screen space this split will take up (0.1 means this only takes up 10% of the space)
-//    element: Element<'a>,
-//    next: Option<Box<Split<'a>>>,
-//}
-
-/// Defines different types of splits
+/// One partition of a page's full area
 #[derive(Clone)]
-pub enum Split {
-    Horizontal(f32),    //horizontal split
-    Vertical(f32),      //vertical split
-    None,               //no split
+pub struct Partition {
+    parent: RefCell<Page>,  //a link to the partition's parent
+    size: (usize, usize),   //the size of this partition
+    offset: (usize, usize), //the offset of this partition from the top left
+    element: Option<Element>,   //the element this partition holds
+}
+impl Partition {
 }
 
 
-/// Allows different elements to be stored as one type
+
 #[derive(Clone)]
-pub enum Element {
-    selector(Selector),
-    text(Text),
-}
-impl Element {
-    pub fn new_selector() -> Element {
-        Element::selector(Selector::new())
-    }
-
-    pub fn new_text(text: String) -> Element {
-        Element::text(Text::new(text))
-    }
-
-    pub fn align(self, alignment: Align) -> Self {
-        match self {
-            Self::selector(s) => {
-                Element::selector(s.align(alignment))
-            },
-            Self::text(t) => {
-                Element::text(t.align(alignment))
-            },
-        }
-    }
-
-    pub fn tag(self, tag: String) -> Self {
-        match self {
-            Self::selector(s) => {
-                Element::selector(s.tag(tag))
-            },
-            Self::text(t) => {
-                Element::text(t.tag(tag))
-            },
-        }
-    }
-
-    pub fn colors(self, colors: Colors) -> Self {
-        match self {
-            Self::selector(s) => {
-                Element::selector(s.colors(colors))
-            },
-            Self::text(t) => {
-                Element::text(t.colors(colors))
-            },
-        }
-    }
+pub struct Element {
 
 }
+
 
 
 /// Lets the user select from a number of options

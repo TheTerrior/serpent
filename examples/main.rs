@@ -1,4 +1,4 @@
-use std::io::{self, stdin};
+use std::{io::{self, stdin}, cell::RefCell};
 
 use serpent::{self, internal::*};
 
@@ -9,8 +9,22 @@ fn main() {
     build_ui();
 }
 
+fn test_arrays<const N: usize>() -> [i32; N] {
+    let test_arr = [0; N];
+    return test_arr;
+}
+
+struct test_struct {
+    pub first: i32,
+    pub second: i32,
+}
+
 fn build_ui() {
     serpent::start();
+
+    let [x, y, z] = test_arrays::<3>();
+    let [a, b, c, d] = test_arrays::<4>();
+    
 
     /* 
 
@@ -25,6 +39,13 @@ fn build_ui() {
             ])
     );
     */
+
+    let mut ui = serpent::new();
+    let (root_index, root_main) = ui.new_page();
+
+    let str_test = RefCell::new(test_struct{first: 31, second: 30});
+    str_test.borrow_mut().first = 29;
+    println!("{}", str_test.borrow().first);
 
     /* 
     let mut ui = serpent::from(
