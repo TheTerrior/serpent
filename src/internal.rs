@@ -8,7 +8,7 @@ use crate::{error, Color};
 #[derive(Clone)]
 pub struct Page {
     pub keybinds: Vec<Keybind>,
-    pub partitions: Vec<Partition>,
+    pub partitions: Vec<Rc<RefCell<Partition>>>,
 }
 impl Page {
 
@@ -34,10 +34,10 @@ impl Page {
 /// One partition of a page's full area
 #[derive(Clone)]
 pub struct Partition {
-    parent: RefCell<Page>,  //a link to the partition's parent
-    size: (usize, usize),   //the size of this partition
-    offset: (usize, usize), //the offset of this partition from the top left
-    element: Option<Element>,   //the element this partition holds
+    pub parent: Rc<RefCell<Page>>,  //a link to the partition's parent
+    pub size: (usize, usize),   //the size of this partition
+    pub offset: (usize, usize), //the offset of this partition from the top left
+    pub element: Option<Element>,   //the element this partition holds
 }
 impl Partition {
 }

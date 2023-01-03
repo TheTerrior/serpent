@@ -20,10 +20,13 @@ struct test_struct {
 }
 
 fn build_ui() {
-    serpent::start();
 
     let [x, y, z] = test_arrays::<3>();
     let [a, b, c, d] = test_arrays::<4>();
+
+    let str_test = RefCell::new(test_struct{first: 31, second: 30});
+    str_test.borrow_mut().first = 29;
+    println!("{}", str_test.borrow().first);
     
 
     /* 
@@ -43,9 +46,9 @@ fn build_ui() {
     let mut ui = serpent::new();
     let (root_index, root_main) = ui.new_page();
 
-    let str_test = RefCell::new(test_struct{first: 31, second: 30});
-    str_test.borrow_mut().first = 29;
-    println!("{}", str_test.borrow().first);
+
+    panic!();
+    //serpent::start();
 
     /* 
     let mut ui = serpent::from(
@@ -75,7 +78,7 @@ fn build_ui() {
     //ui.show();
 
 
-    serpent::stop();
+    //serpent::stop();
 
 }
 
