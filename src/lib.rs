@@ -37,12 +37,6 @@ pub fn restart() {
     nc::initscr();
 }
 
-
-
-//
-/// UI INTERFACE
-//
-
 /// Create a new instance of UI
 pub fn new() -> UI {
     nc::initscr(); //start ncurses
@@ -100,31 +94,52 @@ impl Drop for UI {
 
 
 
+/// Used to communicate text to SerpentWriter
+#[derive(Clone)]
+pub struct ColorText {
+    pub location: (usize, usize), //location to start printing the text on the screen
+    pub text: String,
+    pub foreground: Color,
+    pub background: Color,    
+}
+impl ColorText {
+    pub fn new(text: String, foreground: Color, background: Color, location: (usize, usize)) -> Self {
+        ColorText { location, text, foreground, background}
+    }
+    
+    pub fn simple(text: String) -> Self {
+        ColorText { location: (0, 0), text: text, foreground: Color::Default, background: Color::Default}
+    }
+}
+
+
 /// Enum used for color declarations
 #[derive(Clone)]
 pub enum Color {
-    Inherit,
+    Default,
     Black,
     White,
     Red,
     Green,
     Blue,
     Cyan,
-    Magent,
+    Magenta,
     Yellow,
 }
+
 
 
 /// Used as an element's interface with ncurses
 #[derive(Clone)]
 pub struct SerpentWriter {
-    messages: Vec<String>, //stores the messages from one element
+    messages: Vec<ColorText>, //stores the messages from one element
 }
 impl SerpentWriter {
     fn print(&mut self, message: String, output: &mut SerpentWriter) {
-        self.messages.push(message);
+        self.messages.push(ColorText::simple(message));
     }
 }
+
 
 
 /// Base trait for all elements in serpent, allows user to define their own elements

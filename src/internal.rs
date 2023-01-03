@@ -244,10 +244,10 @@ impl Colors {
     /// Inherit the colors from the page
     pub fn inherit() -> Colors {
         Colors {
-            foreground_default: Color::Inherit,
-            background_default: Color::Inherit,
-            foreground_selected: Color::Inherit,
-            background_selected: Color::Inherit,
+            foreground_default: Color::Default,
+            background_default: Color::Default,
+            foreground_selected: Color::Default,
+            background_selected: Color::Default,
         }
     }
 }
