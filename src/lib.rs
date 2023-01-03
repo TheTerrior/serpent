@@ -135,8 +135,8 @@ pub struct SerpentWriter {
     messages: Vec<ColorText>, //stores the messages from one element
 }
 impl SerpentWriter {
-    fn print(&mut self, message: String, output: &mut SerpentWriter) {
-        self.messages.push(ColorText::simple(message));
+    fn print(&mut self, message: ColorText, output: &mut SerpentWriter) {
+        self.messages.push(message);
     }
 }
 
