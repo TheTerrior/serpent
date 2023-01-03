@@ -7,16 +7,14 @@ use crate::{error, Color, SerpentWriter, SerpentElement};
 /// Represents a single page, which can contain a selector and a guide
 #[derive(Clone)]
 pub struct Page {
-    pub index: usize,
     pub keybinds: Vec<Keybind>,
     pub partitions: Vec<(Rc<RefCell<Partition>>, (usize, usize), (usize, usize))>, // (partition, size, offset)
 }
 impl Page {
 
     /// Initialize a new instance of Page
-    pub fn new(index: usize) -> Page {
+    pub fn new() -> Page {
         Page {
-            index: index,
             keybinds: Keybinds::default(),
             partitions: Vec::new(),
 
@@ -53,11 +51,28 @@ impl Page {
 /// One partition of a page's full area
 #[derive(Clone)]
 pub struct Partition {
-    pub parent: Rc<RefCell<Page>>,  //a link to the partition's parent
+    parent: Rc<RefCell<Page>>,  //a link to the partition's parent
     pub size: (usize, usize),   //the size of this partition
     pub element: Option<Element>,   //the element this partition holds
 }
 impl Partition {
+    
+    /// Initialize a new partition
+    pub fn new(parent: Rc<RefCell<Page>>, size: (usize, usize)) -> Self {
+        Partition { parent: parent, size: size, element: None }
+    }
+
+
+    /// Split this partition into multiple new partitions
+    pub fn split<const N: usize>(mut self) -> [Self; N] {
+        let mut ret: [Partition; N] = unsafe {mem::MaybeUninit::uninit().assume_init()}; //initialize empty array
+
+        // for each item in the length
+        for i in 0..N {
+            ret[i] = Partition::new(self.parent.clone(), self.size.clone());
+        }
+        ret
+    }
 }
 impl SerpentElement for Partition {
     fn show(&self, output: &SerpentWriter) {

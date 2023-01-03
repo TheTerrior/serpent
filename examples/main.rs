@@ -44,7 +44,8 @@ fn build_ui() {
     */
 
     let mut ui = serpent::new();
-    let (root_partition_size, root_partition) = ui.new_page();
+    let (page_index, partition) = ui.new_page();
+    let partition_size = partition.borrow().size;
 
 
     panic!();
