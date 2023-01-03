@@ -44,7 +44,7 @@ fn build_ui() {
     */
 
     let mut ui = serpent::new();
-    let (root_index, root_main) = ui.new_page();
+    let (root_partition_size, root_partition) = ui.new_page();
 
 
     panic!();
@@ -82,16 +82,16 @@ fn build_ui() {
 
 }
 
-fn test_ncurses() {
-    let ui = serpent::new();
-    serpent::restart();
-    ui.show();
-    serpent::stop();
-    let mut x: String = String::new();
-    stdin().read_line(&mut x);
-    println!("{}", x);
-
-    serpent::restart();
-    ui.show();
-    serpent::stop();
-}
+//fn test_ncurses() {
+//    let ui = serpent::new();
+//    serpent::restart();
+//    ui.show();
+//    serpent::stop();
+//    let mut x: String = String::new();
+//    stdin().read_line(&mut x);
+//    println!("{}", x);
+//
+//    serpent::restart();
+//    ui.show();
+//    serpent::stop();
+//}

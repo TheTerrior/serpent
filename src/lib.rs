@@ -67,55 +67,40 @@ impl UI {
         }
     }
 
-    /// Create a new page in this UI, returns a page index and the page's base partition
-    pub fn new_page(&mut self) -> (usize, Rc<RefCell<Partition>>) {
-        let page_ref = Rc::new(RefCell::new(Page::new())); //place a new page into an rc
+    /// Create a new page in this UI, returns a page index, the partition's size, and the page's base partition
+    pub fn new_page(&mut self) -> ((usize, usize), Rc<RefCell<Partition>>) {
+        let page_ref = Rc::new(RefCell::new(Page::new(self.pages.len()))); //place a new page into an rc, set its index
 
         // create the base partition for this new page
         let base_partition = Partition {
             parent: page_ref.clone(), //set the parent page of this partition
             size: termsize::get().map(|size| (size.cols as usize, size.rows as usize)).unwrap(), //get the size of the terminal
-            offset: (0, 0), //no offset, base partition
             element: None, //no initial element
         };
         let base_partition_ref = Rc::new(RefCell::new(base_partition)); //place the base partition into an rc
 
-        page_ref.borrow_mut().partitions = vec![base_partition_ref.clone()]; //push the base partition to the page's list of partitions
+        // push the base partition to the page's list of partitions
+        let t_size = termsize::get().unwrap();
+        page_ref.borrow_mut().partitions = vec![
+            (base_partition_ref.clone(), (0, 0), (t_size.cols as usize, t_size.rows as usize))
+        ];
+
         self.pages.push(page_ref); //push the page to the UI's list of pages
-        (self.pages.len(), base_partition_ref) //return an rc to the partition
+        ((t_size.cols as usize, t_size.rows as usize), base_partition_ref) //return an rc to the partition
     }
 
 
-    /// Run the UI and retrieve the result
-    pub fn show(&self) -> SerpentResult {
-        loop {
-            self.render();
-            let res = self.get_input();
-
-            // if our result is None, then we can safely iterate again
-            if let SerpentResult::None = res {
-                continue;
-            };
-            return res;
-        }
-    }
-
-    /// Renders the current frame
-    fn render(&self) {
-        let width = termsize::get().unwrap().cols;
-        let height = termsize::get().unwrap().rows;
-    }
-
-    /// Gets user input and takes the correct action
+    /// Gets user input and takes the correct action TODO
     fn get_input(&self) -> SerpentResult {
         SerpentResult::Exit
     }
 }
 impl Drop for UI {
-    fn drop(&mut self) { //allows ncurses to stop when the UI is deallocated, possible even during panics
+    fn drop(&mut self) { //allows ncurses to stop when the UI is deallocated, possibly even during panics
         nc::endwin();
     }
 }
+
 
 
 /// Enum used for color declarations
@@ -130,6 +115,24 @@ pub enum Color {
     Cyan,
     Magent,
     Yellow,
+}
+
+
+/// Used as an element's interface with ncurses
+#[derive(Clone)]
+pub struct SerpentWriter {
+    messages: Vec<String>, //stores the messages from one element
+}
+impl SerpentWriter {
+    fn print(&mut self, message: String, output: &mut SerpentWriter) {
+        self.messages.push(message);
+    }
+}
+
+
+/// Base trait for all elements in serpent, allows user to define their own elements
+pub trait SerpentElement {
+    fn show(&self, output: &SerpentWriter); 
 }
 
 

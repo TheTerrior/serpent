@@ -1,20 +1,22 @@
 use std::{mem, cell::RefCell, rc::Rc};
 use ncurses as nc;
 
-use crate::{error, Color};
+use crate::{error, Color, SerpentWriter, SerpentElement};
 
 
 /// Represents a single page, which can contain a selector and a guide
 #[derive(Clone)]
 pub struct Page {
+    pub index: usize,
     pub keybinds: Vec<Keybind>,
-    pub partitions: Vec<Rc<RefCell<Partition>>>,
+    pub partitions: Vec<(Rc<RefCell<Partition>>, (usize, usize), (usize, usize))>, // (partition, size, offset)
 }
 impl Page {
 
     /// Initialize a new instance of Page
-    pub fn new() -> Page {
+    pub fn new(index: usize) -> Page {
         Page {
+            index: index,
             keybinds: Keybinds::default(),
             partitions: Vec::new(),
 
@@ -22,11 +24,28 @@ impl Page {
     }
 
 
-
     /// Set the keybinds for this page
     pub fn keybinds(mut self, binds: Vec<Keybind>) -> Self {
         self.keybinds = binds;
         self
+    }
+
+
+    /// Print this page to the screen
+    pub fn show(&mut self, output: &mut SerpentWriter) {
+
+        //iterate through all partitions in this page
+        for (partition, size, offset) in &self.partitions {
+            let partition_ref = partition.clone();
+            partition_ref.borrow().show(output); //let the writer print its messages to the immutable writer
+            Page::print(output, *size, *offset);
+        }
+    }
+
+
+    /// Print a SerpentWriter's contents to the screen
+    fn print(output: &mut SerpentWriter, size: (usize, usize), offset: (usize, usize)) {
+
     }
 }
 
@@ -36,18 +55,45 @@ impl Page {
 pub struct Partition {
     pub parent: Rc<RefCell<Page>>,  //a link to the partition's parent
     pub size: (usize, usize),   //the size of this partition
-    pub offset: (usize, usize), //the offset of this partition from the top left
     pub element: Option<Element>,   //the element this partition holds
 }
 impl Partition {
+}
+impl SerpentElement for Partition {
+    fn show(&self, output: &SerpentWriter) {
+        todo!()
+    }
 }
 
 
 
 #[derive(Clone)]
 pub struct Element {
-
+    
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
