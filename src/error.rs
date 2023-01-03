@@ -1,9 +1,11 @@
 use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
-enum SerpentError {
+pub enum SerpentError {
     MultipleMenus,  //Multiple menus declared in a single page
     SplitOutOfBounds,   //Split boundaries were outside of the range [0.0, 1.0]
+    SplitTooSmall,      //Splitting causes one window to have a width or height of 0
+    TerminalSizeError, //Error retrieveing the size of the terminal
 }
 impl Error for SerpentError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
@@ -23,7 +25,9 @@ impl Display for SerpentError {
         write!(f, "Serpent Error: {}", 
             match &self {
                 SerpentError::MultipleMenus => "MultipleMenus, only one menu is allowed per window.",
-                SerpentError::SplitOutOfBounds => "SplitOutOfBounds, a split was given a value outside of the range [0.0, 1.0]."
+                SerpentError::SplitOutOfBounds => "SplitOutOfBounds, a split was given a value outside of the range [0.0, 1.0].",
+                SerpentError::SplitTooSmall => "SplitTooSmall, splitting caused a partition to have 0 internal area",
+                SerpentError::TerminalSizeError => "TerminalSizeError, issue finding the size of the terminal.",
             }
         )
     }

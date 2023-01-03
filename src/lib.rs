@@ -4,6 +4,7 @@ pub mod error;
 use std::{cell::RefCell, rc::Rc};
 
 use internal::*;
+use error::SerpentError;
 use ncurses as nc;
 use termsize;
 
@@ -68,16 +69,13 @@ impl UI {
     }
 
     /// Create a new page in this UI, returns a page index, the partition's size, and the page's base partition
-    pub fn new_page(&mut self) -> (usize, Rc<RefCell<Partition>>) {
+    pub fn new_page(&mut self) -> Result<(usize, Rc<RefCell<Partition>>), SerpentError> {
         let page_ref = Rc::new(RefCell::new(Page::new())); //place a new page into an rc, set its index
-        let t_size = termsize::get().map(|size| (size.cols as usize, size.rows as usize)).unwrap(); //get the size of the terminal
+        let t_size = termsize::get() //get the size of the terminal
+            .map(|size| (size.cols as usize, size.rows as usize))
+            .ok_or(SerpentError::TerminalSizeError)?;
 
         // create the base partition for this new page
-        //let base_partition = Partition {
-        //    //parent: page_ref.clone(), //set the parent page of this partition
-        //    size: t_size,
-        //    element: None, //no initial element
-        //};
         let base_partition = Partition::new(page_ref.clone(), t_size);
         let base_partition_ref = Rc::new(RefCell::new(base_partition)); //place the base partition into an rc
 
@@ -85,7 +83,7 @@ impl UI {
         page_ref.borrow_mut().partitions = vec![(base_partition_ref.clone(), (0, 0), t_size)];
 
         self.pages.push(page_ref); //push the page to the UI's list of pages
-        (self.pages.len()-1, base_partition_ref) //return an rc to the partition
+        Ok((self.pages.len()-1, base_partition_ref)) //return an rc to the partition
     }
 
 
