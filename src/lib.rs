@@ -135,14 +135,6 @@ pub trait SerpentElement {
 }
 
 
-macro_rules! array {
-    [$a: expr; $b: expr] => { //receive a default value and a size
-        {
-            $a+$b
-        }
-    }
-}
-
 
 
 

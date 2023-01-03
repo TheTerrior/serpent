@@ -1,6 +1,6 @@
 use std::{io::{self, stdin}, cell::RefCell};
 
-use serpent::{self, internal::*};
+use serpent::{self};
 
 fn main() {
     //let x = serpent::add(1, 2);
@@ -48,7 +48,7 @@ fn build_ui() {
     let partition_size = partition.borrow().size;
 
 
-    panic!();
+    //panic!();
     //serpent::start();
 
     /* 

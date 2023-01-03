@@ -41,11 +41,12 @@ impl Page {
     }
 
 
-    /// Print a SerpentWriter's contents to the screen
+    /// Print a SerpentWriter's contents to the screen, TODO
     fn print(output: &mut SerpentWriter, size: (usize, usize), offset: (usize, usize)) {
 
     }
 }
+
 
 
 /// One partition of a page's full area
@@ -53,7 +54,7 @@ impl Page {
 pub struct Partition {
     parent: Rc<RefCell<Page>>,  //a link to the partition's parent
     pub size: (usize, usize),   //the size of this partition
-    pub element: Option<Element>,   //the element this partition holds
+    pub element: Option<&'static dyn SerpentElement>,   //the element this partition points to, must implement SerpentElement
 }
 impl Partition {
     
@@ -63,7 +64,7 @@ impl Partition {
     }
 
 
-    /// Split this partition into multiple new partitions
+    /// Split this partition into multiple new partitions, TODO
     pub fn split<const N: usize>(mut self) -> [Self; N] {
         let mut ret: [Partition; N] = unsafe {mem::MaybeUninit::uninit().assume_init()}; //initialize empty array
 
@@ -73,19 +74,17 @@ impl Partition {
         }
         ret
     }
-}
-impl SerpentElement for Partition {
-    fn show(&self, output: &SerpentWriter) {
-        todo!()
+
+
+    /// Call the internal element's show method
+    pub fn show(&self, output: &SerpentWriter) {
+        if let Some(elem) = self.element {
+            elem.show(output);
+        }
     }
 }
 
 
-
-#[derive(Clone)]
-pub struct Element {
-    
-}
 
 
 
