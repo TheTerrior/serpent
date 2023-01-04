@@ -80,10 +80,10 @@ impl UI {
     }
 
 
-    /// Gets user input and takes the correct action TODO
-    fn get_input(&self) -> SerpentResult {
-        SerpentResult::Exit
-    }
+    ///// Gets user input and takes the correct action TODO
+    //fn get_input(&self) -> SerpentResult {
+    //    SerpentResult::Exit
+    //}
 }
 impl Drop for UI {
     fn drop(&mut self) { //allows ncurses to stop when the UI is deallocated, possibly even during panics
