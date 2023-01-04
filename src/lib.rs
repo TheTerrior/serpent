@@ -69,11 +69,11 @@ impl UI {
             .ok_or(SerpentError::TerminalSizeError)?;
 
         // create the base partition for this new page
-        let base_partition = Partition::new(page_ref.clone(), t_size);
+        let base_partition = Partition::new(page_ref.clone(), 0);
         let base_partition_ref = Rc::new(RefCell::new(base_partition)); //place the base partition into an rc
 
         // push the base partition to the page's list of partitions
-        page_ref.borrow_mut().partitions = vec![(base_partition_ref.clone(), (0, 0), t_size)];
+        page_ref.borrow_mut().partitions = vec![PartitionInfo::new(base_partition_ref.clone(), (0, 0), t_size)];
 
         self.pages.push(page_ref); //push the page to the UI's list of pages
         Ok((self.pages.len()-1, base_partition_ref)) //return an rc to the partition

@@ -7,16 +7,16 @@ use crate::{error, Color, SerpentWriter, SerpentElement};
 /// Represents a single page, which can contain a selector and a guide
 #[derive(Clone)]
 pub struct Page {
+    pub partitions: Vec<PartitionInfo>, //allows verification information to be abstracted from a Partition
     pub keybinds: Vec<Keybind>,
-    pub partitions: Vec<(Rc<RefCell<Partition>>, (usize, usize), (usize, usize))>, // (partition, size, offset)
 }
 impl Page {
 
     /// Initialize a new instance of Page
     pub fn new() -> Page {
         Page {
-            keybinds: Keybinds::default(),
             partitions: Vec::new(),
+            keybinds: Keybinds::default(),
 
         }
     }
@@ -33,10 +33,14 @@ impl Page {
     pub fn show(&mut self, output: &mut SerpentWriter) {
 
         //iterate through all partitions in this page
-        for (partition, size, offset) in &self.partitions {
+        for info in &self.partitions {
+            let partition = info.partition.clone();
+            let offset = info.offset;
+            let size = info.size;
+
             let partition_ref = partition.clone();
             partition_ref.borrow().show(output); //let the writer print its messages to the immutable writer
-            Page::print(output, *size, *offset);
+            Page::print(output, size, offset);
         }
     }
 
@@ -49,18 +53,39 @@ impl Page {
 
 
 
+/// Helper struct for the partitions list in Page
+#[derive(Clone)]
+pub struct PartitionInfo {
+    pub partition: Rc<RefCell<Partition>>,
+    pub offset: (usize, usize),
+    pub size: (usize, usize),
+}
+impl PartitionInfo {
+    pub fn new(partition: Rc<RefCell<Partition>>, offset: (usize, usize), size: (usize, usize)) -> Self {
+        PartitionInfo {partition, offset, size}
+    }
+}
+
+
+
 /// One partition of a page's full area
 #[derive(Clone)]
 pub struct Partition {
     parent: Rc<RefCell<Page>>,  //a link to the partition's parent
-    pub size: (usize, usize),   //the size of this partition
+    index: usize, //the index of this partition in the page's list of partitions
     pub element: Option<&'static dyn SerpentElement>,   //the element this partition points to, must implement SerpentElement
 }
 impl Partition {
     
     /// Initialize a new partition
-    pub fn new(parent: Rc<RefCell<Page>>, size: (usize, usize)) -> Self {
-        Partition { parent: parent, size: size, element: None }
+    pub fn new(parent: Rc<RefCell<Page>>, index: usize) -> Self {
+        Partition { parent: parent, index: index, element: None }
+    }
+
+
+    /// Get the size of this partition
+    pub fn get_size(&self) -> (usize, usize) {
+        self.parent.borrow().partitions[self.index].size
     }
 
 
@@ -70,7 +95,7 @@ impl Partition {
 
         // for each item in the length
         for i in 0..N {
-            ret[i] = Partition::new(self.parent.clone(), self.size.clone());
+            ret[i] = Partition::new(self.parent.clone(), 0);
         }
         ret
     }
