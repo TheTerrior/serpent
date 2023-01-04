@@ -1,5 +1,6 @@
 pub mod internal;
 pub mod error;
+pub mod elements;
 
 use std::{cell::RefCell, rc::Rc};
 
@@ -7,8 +8,6 @@ use internal::*;
 use error::SerpentError;
 use ncurses as nc;
 use termsize;
-
-
 
 
 //
