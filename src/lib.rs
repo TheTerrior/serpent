@@ -97,7 +97,7 @@ impl UI {
     pub fn next(&self) -> SerpentEvent {
         ncurses::refresh(); //refresh the screen
         let event = ncurses::getch();
-        if event == 409 { //if received a mouse event
+        if event == ncurses::KEY_MOUSE { //if received a mouse event
             let mut mevent: ncurses::MEVENT = unsafe {std::mem::MaybeUninit::uninit().assume_init()};
             ncurses::getmouse(&mut mevent);
             SerpentEvent {
@@ -184,7 +184,7 @@ pub struct SerpentWriter {
     messages: Vec<ColorText>, //stores the messages from one element
 }
 impl SerpentWriter {
-    fn print(&mut self, message: ColorText, output: &mut SerpentWriter) {
+    pub fn print(&mut self, message: ColorText) {
         self.messages.push(message);
     }
 }
