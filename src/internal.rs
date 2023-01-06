@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, collections::{HashMap, HashSet}};
 
 use crate::{error, Color, SerpentWriter, SerpentElement};
 
@@ -7,7 +7,7 @@ use crate::{error, Color, SerpentWriter, SerpentElement};
 #[derive(Clone)]
 pub struct Page {
     pub partitions: Vec<PartitionInfo>, //allows verification information to be abstracted from a Partition
-    //pub keybinds: Vec<Keybind>,
+    pub actions: HashMap<i32, HashSet<u32>>, //binds a phyiscal key to an action
 }
 impl Page {
 
@@ -15,8 +15,7 @@ impl Page {
     pub fn new() -> Page {
         Page {
             partitions: Vec::new(),
-            //keybinds: Keybinds::default(),
-
+            actions: HashMap::new(),
         }
     }
 
@@ -40,6 +39,31 @@ impl Page {
     /// Print a SerpentWriter's contents to the screen, TODO
     fn print(output: &mut SerpentWriter, size: (usize, usize), offset: (usize, usize)) {
 
+    }
+
+
+    /// Binds a key to an action on this page
+    pub fn bind(&mut self, key: i32, action: u32) -> bool {
+        let res = self.actions.get_mut(&key);
+        match res {
+            None => {
+                self.actions.insert(key, HashSet::from([action])) != None
+            },
+            Some(set) => {
+                set.insert(action)
+            },
+        }
+    }
+
+
+    /// Unbinds a key from an action on this page, returns whether the binding was present
+    pub fn unbind(&mut self, key: i32, action: u32) -> bool {
+        let res = self.actions.get_mut(&key);
+        if let Some(set) = res { //only need to unbind if the key is binded at all
+            set.remove(&action)
+        } else {
+            false
+        }
     }
 }
 
@@ -98,6 +122,18 @@ impl Partition {
         if let Some(elem) = self.element {
             elem.show(output);
         }
+    }
+
+
+    /// Binds a key to an action on this page, returns whether the binding was present
+    pub fn bind_local(&mut self, key: i32, action: u32, page: usize) -> bool {
+        self.parent.borrow_mut().bind(key, action)
+    }
+
+
+    /// Unbinds a key from an action on this page
+    pub fn unbind_local(&mut self, key: i32, action: u32, page: usize) -> bool {
+        self.parent.borrow_mut().unbind(key, action)
     }
 }
 

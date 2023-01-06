@@ -3,7 +3,7 @@ pub mod error;
 pub mod elements;
 pub mod constants;
 
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, collections::{HashMap, HashSet}, hash::Hash};
 
 use internal::*;
 use error::SerpentError;
@@ -52,8 +52,8 @@ pub fn new() -> UI {
 /// Main controller for Serpent, utilizes ncurses
 pub struct UI {
     pages: Vec<Rc<RefCell<Page>>>,
-    //window: ncurses::WINDOW,
-    //mouse_events: ncurses::MEVENT,
+    action_counter: u32,
+    actions: HashMap<i32, HashSet<u32>>, //binds a phyiscal key to an action
 }
 impl UI {
 
@@ -67,6 +67,8 @@ impl UI {
         ncurses::curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_INVISIBLE); //make mouse invisible
         UI {
             pages: Vec::new(),
+            action_counter: 0,
+            actions: HashMap::new(),
         }
     }
 
@@ -89,11 +91,7 @@ impl UI {
     }
 
 
-    ///// Gets user input and takes the correct action TODO
-    //fn get_input(&self) -> SerpentResult {
-    //    SerpentResult::Exit
-    //}
-
+    /// Gets user input and returns the result
     pub fn next(&self) -> SerpentEvent {
         ncurses::refresh(); //refresh the screen
         let event = ncurses::getch();
@@ -114,6 +112,50 @@ impl UI {
                 actions: Vec::new(),
             }
         }
+    }
+
+
+    /// Creates a new action for this UI
+    pub fn new_action(&mut self) -> u32 {
+        self.action_counter += 1;
+        self.action_counter - 1
+    }
+
+
+    /// Binds a key to an action globally, returns whether the binding was present
+    pub fn bind_global(&mut self, key: i32, action: u32) -> bool {
+        let res = self.actions.get_mut(&key);
+        match res {
+            None => { //key is not bound to anything
+                self.actions.insert(key, HashSet::from([action])) != None
+            },
+            Some(set) => { //key is bound to something
+                !set.insert(action)
+            },
+        }
+    }
+
+
+    /// Unbinds a key from an action globally, returns whether the binding was present
+    pub fn unbind_global(&mut self, key: i32, action: u32) -> bool {
+        let res = self.actions.get_mut(&key);
+        if let Some(set) = res { //key is bound to the action
+            set.remove(&action)
+        } else { //key not bound to the action
+            false
+        }
+    }
+
+
+    /// Binds a key to an action on a specific page, returns whether the binding was present
+    pub fn bind_local(&mut self, key: i32, action: u32, page: usize) -> bool {
+        self.pages[page].borrow_mut().bind(key, action)
+    }
+
+
+    /// Unbinds a key from an action on a specific page
+    pub fn unbind_local(&mut self, key: i32, action: u32, page: usize) -> bool {
+        self.pages[page].borrow_mut().unbind(key, action)
     }
 }
 impl Drop for UI {
@@ -141,6 +183,20 @@ impl ColorText {
         ColorText { location: (0, 0), text: text, foreground: Color::Default, background: Color::Default}
     }
 }
+
+
+
+/// Allows the user to bind a key to an action
+//#[derive(Clone, Debug)]
+//pub struct Keybind {
+//    pub key: i32,
+//    pub action: u32,
+//}
+//impl Keybind {
+//    pub fn new(key: i32, action: u32) -> Self {
+//        Keybind { key, action }
+//    }    
+//}
 
 
 

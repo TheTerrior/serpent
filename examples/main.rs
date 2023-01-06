@@ -9,23 +9,23 @@ fn main() {
     build_ui();
 }
 
-fn test_arrays<const N: usize>() -> [i32; N] {
-    let test_arr = [0; N];
-    return test_arr;
-}
+//fn test_arrays<const N: usize>() -> [i32; N] {
+//    let test_arr = [0; N];
+//    return test_arr;
+//}
 
-struct test_struct {
-    pub first: i32,
-    pub second: i32,
-}
+//struct test_struct {
+//    pub first: i32,
+//    pub second: i32,
+//}
 
 fn build_ui() {
 
-    let [x, y, z] = test_arrays::<3>();
-    let [a, b, c, d] = test_arrays::<4>();
+    //let [x, y, z] = test_arrays::<3>();
+    //let [a, b, c, d] = test_arrays::<4>();
 
-    let str_test = RefCell::new(test_struct{first: 31, second: 30});
-    str_test.borrow_mut().first = 29;
+    //let str_test = RefCell::new(test_struct{first: 31, second: 30});
+    //str_test.borrow_mut().first = 29;
     //println!("{}", str_test.borrow().first);
     
 
@@ -44,8 +44,8 @@ fn build_ui() {
     */
 
     let mut ui = serpent::new();
-    let (page_index, partition) = ui.new_page().unwrap();
-    let partition_size = partition.borrow().get_size();
+    let (_, partition) = ui.new_page().unwrap();
+    partition.borrow().get_size();
 
     let inp = ui.next();
     drop(ui);
