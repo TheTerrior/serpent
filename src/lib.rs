@@ -6,7 +6,6 @@ use std::{cell::RefCell, rc::Rc};
 
 use internal::*;
 use error::SerpentError;
-use termsize;
 
 
 //
@@ -16,6 +15,7 @@ use termsize;
 /// Start ncurses
 pub fn start() {
     ncurses::initscr();
+    ncurses::noecho();
 }
 
 /// Stop ncurses
@@ -37,7 +37,9 @@ pub fn restart() {
 
 /// Create a new instance of UI
 pub fn new() -> UI {
-    UI::new(ncurses::initscr()) //start ncurses and save the window to the UI struct
+    //UI::new(ncurses::initscr()) //start ncurses and save the window to the UI struct
+    ncurses::initscr();
+    UI::new() //start ncurses
 }
 
 
@@ -49,18 +51,23 @@ pub fn new() -> UI {
 /// Main controller for Serpent, utilizes ncurses
 pub struct UI {
     pages: Vec<Rc<RefCell<Page>>>,
-    window: ncurses::WINDOW,
+    //window: ncurses::WINDOW,
+    //mouse_events: ncurses::MEVENT,
 }
 impl UI {
 
     /// Create a new instance of UI
-    fn new(stdscr: ncurses::WINDOW) -> UI {
-        ncurses::intrflush(stdscr, false);
-        ncurses::keypad(stdscr, true);
-        UI {
+    fn new() -> UI {
+        ncurses::intrflush(ncurses::stdscr(), false); //not sure what this does
+        ncurses::keypad(ncurses::stdscr(), true); //enable keypad, so that arrow keys and other buttons function
+        ncurses::clear(); //not sure
+        ncurses::noecho(); //don't print whatever is typed
+        ncurses::mousemask(ncurses::ALL_MOUSE_EVENTS as ncurses::mmask_t, None); //enable mouse events
+        ncurses::curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_INVISIBLE); //make mouse invisible
+        let ui = UI {
             pages: Vec::new(),
-            window: stdscr,
-        }
+        };
+        ui
     }
 
     /// Create a new page in this UI, returns a page index, the partition's size, and the page's base partition
@@ -88,6 +95,7 @@ impl UI {
     //}
 
     pub fn next(&self) -> i32 {
+        ncurses::refresh(); //refresh the screen
         ncurses::getch()
     }
 }

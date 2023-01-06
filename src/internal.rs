@@ -1,5 +1,4 @@
 use std::{mem, cell::RefCell, rc::Rc};
-use ncurses as nc;
 
 use crate::{error, Color, SerpentWriter, SerpentElement};
 
