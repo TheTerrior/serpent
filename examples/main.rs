@@ -50,7 +50,7 @@ fn build_ui() {
     let inp = ui.next();
     drop(ui);
 
-    println!("{}", inp);
+    println!("{:?}", inp);
 
 
     //panic!();

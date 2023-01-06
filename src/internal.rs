@@ -1,4 +1,4 @@
-use std::{mem, cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{error, Color, SerpentWriter, SerpentElement};
 
@@ -83,7 +83,7 @@ impl Partition {
 
     /// Split this partition into multiple new partitions, TODO
     pub fn split<const N: usize>(mut self) -> [Self; N] {
-        let mut ret: [Partition; N] = unsafe {mem::MaybeUninit::uninit().assume_init()}; //initialize empty array
+        let mut ret: [Partition; N] = unsafe {std::mem::MaybeUninit::uninit().assume_init()}; //initialize empty array
 
         // for each item in the length
         for i in 0..N {

@@ -1,6 +1,7 @@
 pub mod internal;
 pub mod error;
 pub mod elements;
+pub mod constants;
 
 use std::{cell::RefCell, rc::Rc};
 
@@ -64,10 +65,9 @@ impl UI {
         ncurses::noecho(); //don't print whatever is typed
         ncurses::mousemask(ncurses::ALL_MOUSE_EVENTS as ncurses::mmask_t, None); //enable mouse events
         ncurses::curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_INVISIBLE); //make mouse invisible
-        let ui = UI {
+        UI {
             pages: Vec::new(),
-        };
-        ui
+        }
     }
 
     /// Create a new page in this UI, returns a page index, the partition's size, and the page's base partition
@@ -94,9 +94,26 @@ impl UI {
     //    SerpentResult::Exit
     //}
 
-    pub fn next(&self) -> i32 {
+    pub fn next(&self) -> SerpentEvent {
         ncurses::refresh(); //refresh the screen
-        ncurses::getch()
+        let event = ncurses::getch();
+        if event == 409 { //if received a mouse event
+            let mut mevent: ncurses::MEVENT = unsafe {std::mem::MaybeUninit::uninit().assume_init()};
+            ncurses::getmouse(&mut mevent);
+            SerpentEvent {
+                input: InputType::Mouse{
+                    x: mevent.x,
+                    y: mevent.y,
+                    event: mevent.bstate,
+                },
+                actions: Vec::new(),
+            }
+        } else { //if a keyboard event
+            SerpentEvent {
+                input: InputType::Key(event),
+                actions: Vec::new(),
+            }
+        }
     }
 }
 impl Drop for UI {
@@ -124,6 +141,25 @@ impl ColorText {
         ColorText { location: (0, 0), text: text, foreground: Color::Default, background: Color::Default}
     }
 }
+
+
+
+/// Tells the user what type of event Serpent has received
+#[derive(Clone, Debug)]
+pub struct SerpentEvent {
+    pub input: InputType, //mouse or keyboard
+    pub actions: Vec<u8>, //if any actions are called, they will be listed here
+}
+
+
+
+/// Helper for SerpentEvent, distinguishes between a keypress and a mouse event
+#[derive(Clone, Debug)]
+pub enum InputType {
+    Key(i32),
+    Mouse{x: i32, y: i32, event: u32},
+}
+
 
 
 /// Enum used for color declarations
