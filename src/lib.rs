@@ -6,7 +6,6 @@ use std::{cell::RefCell, rc::Rc};
 
 use internal::*;
 use error::SerpentError;
-use ncurses as nc;
 use termsize;
 
 
@@ -16,30 +15,29 @@ use termsize;
 
 /// Start ncurses
 pub fn start() {
-    nc::initscr();
+    ncurses::initscr();
 }
 
 /// Stop ncurses
 pub fn stop() {
-    nc::endwin();
+    ncurses::endwin();
 }
 
 /// Refresh ncurses
 pub fn refresh() {
-    nc::refresh();
+    ncurses::refresh();
 }
 
 /// Will relaunch ncurses, whether it's currently running or not
 pub fn restart() {
-    nc::endwin();
-    nc::refresh();
-    nc::initscr();
+    ncurses::endwin();
+    ncurses::refresh();
+    ncurses::initscr();
 }
 
 /// Create a new instance of UI
 pub fn new() -> UI {
-    nc::initscr(); //start ncurses
-    UI::new()
+    UI::new(ncurses::initscr()) //start ncurses and save the window to the UI struct
 }
 
 
@@ -51,20 +49,24 @@ pub fn new() -> UI {
 /// Main controller for Serpent, utilizes ncurses
 pub struct UI {
     pages: Vec<Rc<RefCell<Page>>>,
+    window: ncurses::WINDOW,
 }
 impl UI {
 
     /// Create a new instance of UI
-    fn new() -> UI {
+    fn new(stdscr: ncurses::WINDOW) -> UI {
+        ncurses::intrflush(stdscr, false);
+        ncurses::keypad(stdscr, true);
         UI {
             pages: Vec::new(),
+            window: stdscr,
         }
     }
 
     /// Create a new page in this UI, returns a page index, the partition's size, and the page's base partition
     pub fn new_page(&mut self) -> Result<(usize, Rc<RefCell<Partition>>), SerpentError> {
         let page_ref = Rc::new(RefCell::new(Page::new())); //place a new page into an rc, set its index
-        let t_size = termsize::get() //get the size of the terminal
+        let t_size = termsize::get() //get the size of the terminal in rows and columns
             .map(|size| (size.cols as usize, size.rows as usize))
             .ok_or(SerpentError::TerminalSizeError)?;
 
@@ -84,10 +86,14 @@ impl UI {
     //fn get_input(&self) -> SerpentResult {
     //    SerpentResult::Exit
     //}
+
+    pub fn next(&self) -> i32 {
+        ncurses::getch()
+    }
 }
 impl Drop for UI {
     fn drop(&mut self) { //allows ncurses to stop when the UI is deallocated, possibly even during panics
-        nc::endwin();
+        ncurses::endwin();
     }
 }
 

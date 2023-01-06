@@ -26,7 +26,7 @@ fn build_ui() {
 
     let str_test = RefCell::new(test_struct{first: 31, second: 30});
     str_test.borrow_mut().first = 29;
-    println!("{}", str_test.borrow().first);
+    //println!("{}", str_test.borrow().first);
     
 
     /* 
@@ -46,6 +46,11 @@ fn build_ui() {
     let mut ui = serpent::new();
     let (page_index, partition) = ui.new_page().unwrap();
     let partition_size = partition.borrow().get_size();
+
+    let inp = ui.next();
+    drop(ui);
+
+    println!("{}", inp);
 
 
     //panic!();

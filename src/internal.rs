@@ -22,13 +22,6 @@ impl Page {
     }
 
 
-    ///// Set the keybinds for this page
-    //pub fn keybinds(mut self, binds: Vec<Keybind>) -> Self {
-    //    //self.keybinds = binds;
-    //    self
-    //}
-
-
     /// Print this page to the screen
     pub fn show(&mut self, output: &mut SerpentWriter) {
 
