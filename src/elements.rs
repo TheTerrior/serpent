@@ -29,3 +29,18 @@ impl SerpentElement for MenuSelector {
     }
 }
 
+
+
+pub struct TextBox {
+
+}
+impl SerpentElement for TextBox {
+    fn show(&self, output: &SerpentWriter) {
+        todo!()
+    }
+
+    fn get_type(&self) -> ElementType {
+        ElementType::Live
+    }
+}
+
