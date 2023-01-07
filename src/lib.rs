@@ -257,7 +257,7 @@ pub trait SerpentElement {
 
 /// Denotes what type of partition the current partition is
 #[derive(Clone)]
-enum ElementType {
+pub enum ElementType {
     ////// Simply display the current element without reading keyboard input
     //Display,
 

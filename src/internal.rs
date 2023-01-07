@@ -80,8 +80,9 @@ impl Page {
                 ok_or(SerpentError::NoElementInPartition)?
                 .get_type() {
             self.focus = Some(index);
+            return Ok(());
         }
-        Ok(())
+        Err(SerpentError::FocusLazy)
     }
 }
 

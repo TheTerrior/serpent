@@ -8,6 +8,7 @@ pub enum SerpentError {
     TerminalSizeError, //Error retrieveing the size of the terminal
     InvalidPartitionIndex,
     NoElementInPartition,
+    FocusLazy,
 }
 impl Error for SerpentError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
@@ -32,6 +33,7 @@ impl Display for SerpentError {
                 SerpentError::TerminalSizeError => "TerminalSizeError, issue finding the size of the terminal.",
                 SerpentError::InvalidPartitionIndex => "InvalidPartitionIndex, partition does not exist at the given index",
                 SerpentError::NoElementInPartition => "NoElementInPartition, this partition does not own an element",
+                SerpentError::FocusLazy => "FocusLazy, attempted to focus a lazy element"
             }
         )
     }

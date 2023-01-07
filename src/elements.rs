@@ -1,4 +1,4 @@
-use crate::{SerpentElement, SerpentWriter};
+use crate::{SerpentElement, SerpentWriter, ElementType};
 
 
 /// Display basic text on the screen
@@ -8,6 +8,9 @@ pub struct Text {
 impl SerpentElement for Text {
     fn show(&self, output: &SerpentWriter) {
         todo!()
+    }
+    fn get_type(&self) -> ElementType {
+        ElementType::Lazy
     }
 }
 
@@ -20,6 +23,9 @@ pub struct MenuSelector {
 impl SerpentElement for MenuSelector {
     fn show(&self, output: &SerpentWriter) {
         todo!()
+    }
+    fn get_type(&self) -> ElementType {
+        ElementType::Lazy
     }
 }
 
