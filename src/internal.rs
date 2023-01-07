@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc, collections::{HashMap, HashSet}};
 
-use crate::{error, Color, SerpentWriter, SerpentElement};
+use crate::{error::{self, SerpentError}, Color, SerpentWriter, SerpentElement, ElementType};
 
 
 /// Represents a single page, which can contain a selector and a guide
@@ -8,6 +8,7 @@ use crate::{error, Color, SerpentWriter, SerpentElement};
 pub struct Page {
     pub partitions: Vec<PartitionInfo>, //allows verification information to be abstracted from a Partition
     pub actions: HashMap<i32, HashSet<u32>>, //binds a phyiscal key to an action
+    focus: Option<usize>, //the partition we're focusing on the next show
 }
 impl Page {
 
@@ -16,6 +17,7 @@ impl Page {
         Page {
             partitions: Vec::new(),
             actions: HashMap::new(),
+            focus: None,
         }
     }
 
@@ -65,6 +67,22 @@ impl Page {
             false
         }
     }
+
+
+    /// Temporarily focus a live partition
+    pub fn focus(&mut self, index: usize) -> Result<(), SerpentError> {
+        if let ElementType::Live = self.partitions
+                .get(index)
+                .ok_or(SerpentError::InvalidPartitionIndex)?
+                .partition
+                .borrow()
+                .element.
+                ok_or(SerpentError::NoElementInPartition)?
+                .get_type() {
+            self.focus = Some(index);
+        }
+        Ok(())
+    }
 }
 
 
@@ -93,7 +111,17 @@ pub struct Partition {
 }
 impl Partition {
     
-    /// Initialize a new partition
+    /// Initialize a new lazy partition
+    //pub fn new_lazy(parent: Rc<RefCell<Page>>, index: usize) -> Self {
+    //    Partition { parent: parent, index: index, partition_type: PartitionType::Lazy, element: None }
+    //}
+
+
+    /// Initialize a new live partition
+    //pub fn new_live(parent: Rc<RefCell<Page>>, index: usize) -> Self {
+    //    Partition { parent: parent, index: index, partition_type: PartitionType::Live, element: None }
+    //}
+
     pub fn new(parent: Rc<RefCell<Page>>, index: usize) -> Self {
         Partition { parent: parent, index: index, element: None }
     }

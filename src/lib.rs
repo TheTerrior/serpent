@@ -250,6 +250,21 @@ impl SerpentWriter {
 /// Base trait for all elements in serpent, allows user to define their own elements
 pub trait SerpentElement {
     fn show(&self, output: &SerpentWriter); 
+    fn get_type(&self) -> ElementType;
+}
+
+
+
+/// Denotes what type of partition the current partition is
+#[derive(Clone)]
+enum ElementType {
+    ////// Simply display the current element without reading keyboard input
+    //Display,
+
+    /// Reacts to a specific set of actions
+    Lazy,
+    /// Read all keyboard input, disregard keybinds
+    Live,
 }
 
 
