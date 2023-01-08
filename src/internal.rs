@@ -8,7 +8,8 @@ use crate::{error::{self, SerpentError}, Color, SerpentWriter, SerpentElement, E
 pub struct Page {
     pub partitions: Vec<PartitionInfo>, //allows verification information to be abstracted from a Partition
     pub actions: HashMap<i32, HashSet<u32>>, //binds a phyiscal key to an action
-    focus: Option<usize>, //the partition we're focusing on the next show
+    lazy_focus: Option<usize>, //the default focused lazy partition
+    live_focus: Option<usize>, //the live partition we're temporarily focused on
 }
 impl Page {
 
@@ -17,7 +18,8 @@ impl Page {
         Page {
             partitions: Vec::new(),
             actions: HashMap::new(),
-            focus: None,
+            lazy_focus: None,
+            live_focus: None,
         }
     }
 
@@ -69,8 +71,25 @@ impl Page {
     }
 
 
+    /// Sets a lazy element as the default focus
+    pub fn focus_default(&mut self, index: usize) -> Result<(), SerpentError> {
+        if let ElementType::Lazy = self.partitions
+                .get(index)
+                .ok_or(SerpentError::InvalidPartitionIndex)?
+                .partition
+                .borrow()
+                .element.
+                ok_or(SerpentError::NoElementInPartition)?
+                .get_type() {
+            self.lazy_focus = Some(index);
+            return Ok(());
+        }
+        Err(SerpentError::FocusTypeIncorrect)
+    }
+
+
     /// Temporarily focus a live partition
-    pub fn focus(&mut self, index: usize) -> Result<(), SerpentError> {
+    pub fn focus_live(&mut self, index: usize) -> Result<(), SerpentError> {
         if let ElementType::Live = self.partitions
                 .get(index)
                 .ok_or(SerpentError::InvalidPartitionIndex)?
@@ -79,10 +98,10 @@ impl Page {
                 .element.
                 ok_or(SerpentError::NoElementInPartition)?
                 .get_type() {
-            self.focus = Some(index);
+            self.live_focus = Some(index);
             return Ok(());
         }
-        Err(SerpentError::FocusLazy)
+        Err(SerpentError::FocusTypeIncorrect)
     }
 }
 

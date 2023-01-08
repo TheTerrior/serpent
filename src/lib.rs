@@ -251,6 +251,8 @@ impl SerpentWriter {
 pub trait SerpentElement {
     fn show(&self, output: &SerpentWriter); 
     fn get_type(&self) -> ElementType;
+    fn focused(&mut self);
+    fn unfocused(&mut self);
 }
 
 

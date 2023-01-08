@@ -12,6 +12,14 @@ impl SerpentElement for Text {
     fn get_type(&self) -> ElementType {
         ElementType::Lazy
     }
+
+    fn focused(&mut self) {
+        todo!()
+    }
+
+    fn unfocused(&mut self) {
+        todo!()
+    }
 }
 
 
@@ -27,6 +35,14 @@ impl SerpentElement for MenuSelector {
     fn get_type(&self) -> ElementType {
         ElementType::Lazy
     }
+
+    fn focused(&mut self) {
+        todo!()
+    }
+
+    fn unfocused(&mut self) {
+        todo!()
+    }
 }
 
 
@@ -41,6 +57,14 @@ impl SerpentElement for TextBox {
 
     fn get_type(&self) -> ElementType {
         ElementType::Live
+    }
+
+    fn focused(&mut self) {
+        todo!()
+    }
+
+    fn unfocused(&mut self) {
+        todo!()
     }
 }
 
