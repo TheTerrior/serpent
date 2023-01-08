@@ -186,20 +186,6 @@ impl ColorText {
 
 
 
-/// Allows the user to bind a key to an action
-//#[derive(Clone, Debug)]
-//pub struct Keybind {
-//    pub key: i32,
-//    pub action: u32,
-//}
-//impl Keybind {
-//    pub fn new(key: i32, action: u32) -> Self {
-//        Keybind { key, action }
-//    }    
-//}
-
-
-
 /// Tells the user what type of event Serpent has received
 #[derive(Clone, Debug)]
 pub struct SerpentEvent {
@@ -268,10 +254,6 @@ pub enum ElementType {
     /// Read all keyboard input, disregard keybinds
     Live,
 }
-
-
-
-
 
 
 
