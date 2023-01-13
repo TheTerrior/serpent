@@ -1,4 +1,4 @@
-use crate::{SerpentElement, SerpentWriter, ElementType};
+use crate::{SerpentElement, SerpentWriter, ElementType, InputType};
 
 
 /// Display basic text on the screen
@@ -18,6 +18,14 @@ impl SerpentElement for Text {
     }
 
     fn unfocused(&mut self) {
+        todo!()
+    }
+
+    fn action(&mut self, action: u32) -> () {
+        todo!()
+    }
+
+    fn live_key(&mut self, action: InputType) -> () {
         todo!()
     }
 }
@@ -43,6 +51,14 @@ impl SerpentElement for MenuSelector {
     fn unfocused(&mut self) {
         todo!()
     }
+
+    fn action(&mut self, action: u32) -> () {
+        todo!()
+    }
+
+    fn live_key(&mut self, action: InputType) -> () {
+        todo!()
+    }
 }
 
 
@@ -64,6 +80,14 @@ impl SerpentElement for TextBox {
     }
 
     fn unfocused(&mut self) {
+        todo!()
+    }
+
+    fn action(&mut self, action: u32) -> () {
+        todo!()
+    }
+
+    fn live_key(&mut self, action: InputType) -> () {
         todo!()
     }
 }

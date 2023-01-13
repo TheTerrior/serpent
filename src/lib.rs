@@ -235,10 +235,18 @@ impl SerpentWriter {
 
 /// Base trait for all elements in serpent, allows user to define their own elements
 pub trait SerpentElement {
-    fn show(&self, output: &SerpentWriter); 
+    /// Display this element to the SerpentWriter
+    fn show(&self, output: &SerpentWriter);
+    /// Get the element type, Lazy or Live
     fn get_type(&self) -> ElementType;
+    /// Called when this element goes into focus
     fn focused(&mut self);
+    /// Called when this element is unfocused
     fn unfocused(&mut self);
+    /// Called when an action takes place
+    fn action(&mut self, action: u32);
+    /// Called when a live key takes place, for Live elements
+    fn live_key(&mut self, action: InputType);
 }
 
 
@@ -246,9 +254,6 @@ pub trait SerpentElement {
 /// Denotes what type of partition the current partition is
 #[derive(Clone)]
 pub enum ElementType {
-    ////// Simply display the current element without reading keyboard input
-    //Display,
-
     /// Reacts to a specific set of actions
     Lazy,
     /// Read all keyboard input, disregard keybinds

@@ -42,7 +42,7 @@ impl Page {
 
     /// Print a SerpentWriter's contents to the screen, TODO
     fn print(output: &mut SerpentWriter, size: (usize, usize), offset: (usize, usize)) {
-
+        
     }
 
 
