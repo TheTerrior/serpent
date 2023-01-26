@@ -9,6 +9,7 @@ pub enum SerpentError {
     InvalidPartitionIndex,
     NoElementInPartition,
     FocusTypeIncorrect,
+    PageOutOfBounds, //Attempted to focus a page that was out of bounds
 }
 impl Error for SerpentError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
@@ -33,7 +34,8 @@ impl Display for SerpentError {
                 SerpentError::TerminalSizeError => "TerminalSizeError, issue finding the size of the terminal.",
                 SerpentError::InvalidPartitionIndex => "InvalidPartitionIndex, partition does not exist at the given index",
                 SerpentError::NoElementInPartition => "NoElementInPartition, this partition does not own an element",
-                SerpentError::FocusTypeIncorrect => "FocusTypeIncorrect, attempted to focus the wrong type of element"
+                SerpentError::FocusTypeIncorrect => "FocusTypeIncorrect, attempted to focus the wrong type of element",
+                SerpentError::PageOutOfBounds => "Attempted to focus a page that was out of bounds",
             }
         )
     }

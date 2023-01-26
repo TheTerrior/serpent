@@ -3,7 +3,7 @@ pub mod error;
 pub mod elements;
 pub mod constants;
 
-use std::{cell::RefCell, rc::Rc, collections::{HashMap, HashSet}, hash::Hash};
+use std::{cell::RefCell, rc::Rc};
 
 use internal::*;
 use error::SerpentError;
@@ -52,8 +52,8 @@ pub fn new() -> UI {
 /// Main controller for Serpent, utilizes ncurses
 pub struct UI {
     pages: Vec<Rc<RefCell<Page>>>,
-    action_counter: u32,
-    actions: HashMap<i32, HashSet<u32>>, //binds a phyiscal key to an action
+    focus: usize,
+    writer: SerpentWriter,
 }
 impl UI {
 
@@ -67,8 +67,8 @@ impl UI {
         ncurses::curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_INVISIBLE); //make mouse invisible
         UI {
             pages: Vec::new(),
-            action_counter: 0,
-            actions: HashMap::new(),
+            focus: 0,
+            writer: SerpentWriter { messages: Vec::new() },
         }
     }
 
@@ -89,11 +89,23 @@ impl UI {
         self.pages.push(page_ref); //push the page to the UI's list of pages
         Ok((self.pages.len()-1, base_partition_ref)) //return an rc to the partition
     }
+   
+    
+    /// Go to the specified page
+    pub fn to_page(&mut self, page: usize) -> Result<(), SerpentError> {
+        if page < self.pages.len() {
+            self.focus = page;
+            Ok(())
+        } else {
+            Err(SerpentError::PageOutOfBounds)
+        }
+    }
 
 
     /// Gets user input and returns the result
-    pub fn next(&self) -> SerpentEvent {
-        ncurses::refresh(); //refresh the screen
+    pub fn next(&mut self) -> SerpentEvent {
+        self.pages[self.focus].borrow_mut().show(&mut self.writer); //print focused page to screen
+        ncurses::refresh();
         let event = ncurses::getch();
         if event == ncurses::KEY_MOUSE { //if received a mouse event
             let mut mevent: ncurses::MEVENT = unsafe {std::mem::MaybeUninit::uninit().assume_init()};
@@ -115,48 +127,6 @@ impl UI {
     }
 
 
-    /// Creates a new action for this UI
-    pub fn new_action(&mut self) -> u32 {
-        self.action_counter += 1;
-        self.action_counter - 1
-    }
-
-
-    /// Binds a key to an action globally, returns whether the binding was present
-    pub fn bind_global(&mut self, key: i32, action: u32) -> bool {
-        let res = self.actions.get_mut(&key);
-        match res {
-            None => { //key is not bound to anything
-                self.actions.insert(key, HashSet::from([action])) != None
-            },
-            Some(set) => { //key is bound to something
-                !set.insert(action)
-            },
-        }
-    }
-
-
-    /// Unbinds a key from an action globally, returns whether the binding was present
-    pub fn unbind_global(&mut self, key: i32, action: u32) -> bool {
-        let res = self.actions.get_mut(&key);
-        if let Some(set) = res { //key is bound to the action
-            set.remove(&action)
-        } else { //key not bound to the action
-            false
-        }
-    }
-
-
-    /// Binds a key to an action on a specific page, returns whether the binding was present
-    pub fn bind_local(&mut self, key: i32, action: u32, page: usize) -> bool {
-        self.pages[page].borrow_mut().bind(key, action)
-    }
-
-
-    /// Unbinds a key from an action on a specific page
-    pub fn unbind_local(&mut self, key: i32, action: u32, page: usize) -> bool {
-        self.pages[page].borrow_mut().unbind(key, action)
-    }
 }
 impl Drop for UI {
     fn drop(&mut self) { //allows ncurses to stop when the UI is deallocated, possibly even during panics
@@ -237,28 +207,9 @@ impl SerpentWriter {
 pub trait SerpentElement {
     /// Display this element to the SerpentWriter
     fn show(&self, output: &SerpentWriter);
-    /// Get the element type, Lazy or Live
-    fn get_type(&self) -> ElementType;
-    /// Called when this element goes into focus
-    fn focused(&mut self);
-    /// Called when this element is unfocused
-    fn unfocused(&mut self);
-    /// Called when an action takes place
-    fn action(&mut self, action: u32);
-    /// Called when a live key takes place, for Live elements
-    fn live_key(&mut self, action: InputType);
 }
 
 
-
-/// Denotes what type of partition the current partition is
-#[derive(Clone)]
-pub enum ElementType {
-    /// Reacts to a specific set of actions
-    Lazy,
-    /// Read all keyboard input, disregard keybinds
-    Live,
-}
 
 
 
