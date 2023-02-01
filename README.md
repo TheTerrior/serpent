@@ -1,8 +1,8 @@
 # Serpent
-Rust TUI library built on ncurses, with a focus on menus and pages.
+A light Rust TUI library built on ncurses, making ncurses more accessible while giving the user full control.
 
 ## License
 This work is dual-licensed under GPL Version 2 and GPL Version 3. You may choose between these licenses on a case-by-case basis.
 
-## Usage
-Serpent requires the ncurses crate for Rust to be installed. Please refer to the wiki for documentation.
+## Documentation
+This library is still a work-in-progress, and documentation will be provided once Serpent is in a working state.
